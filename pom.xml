@@ -17,7 +17,7 @@
         <repository>
             <id>simudyne.jfrog.io</id>
             <name>simudyne.jfrog.io</name>
-            <url>https://simudyne.jfrog.io/simudyne/sbt-dev</url>
+            <url>https://simudyne.jfrog.io/simudyne/releases</url>
         </repository>
     </distributionManagement>
 
@@ -25,17 +25,17 @@
         <dependency>
             <groupId>simudyne</groupId>
             <artifactId>providence-simucore_2.11</artifactId>
-            <version>2.0.0-alpha.2</version>
+            <version>2.0.0-alpha.3</version>
         </dependency>
         <dependency>
             <groupId>simudyne</groupId>
             <artifactId>providence-simucom_2.11</artifactId>
-            <version>2.0.0-alpha.2</version>
+            <version>2.0.0-alpha.3</version>
         </dependency>
         <dependency>
             <groupId>simudyne</groupId>
             <artifactId>providence-simucore-abm_2.11</artifactId>
-            <version>2.0.0-alpha.2</version>
+            <version>2.0.0-alpha.3</version>
         </dependency>
     </dependencies>
 
