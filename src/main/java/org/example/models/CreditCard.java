@@ -1,12 +1,10 @@
 package org.example.models;
 
-import providence.simucore.Model;
-import providence.simucore.annotations.Constant;
-import providence.simucore.annotations.Input;
-import providence.simucore.annotations.ModelSettings;
-import providence.simucore.annotations.Variable;
+import simudyne.core.Model;
+import simudyne.core.annotations.Constant;
+import simudyne.core.annotations.Input;
+import simudyne.core.annotations.Variable;
 
-@ModelSettings(timeUnit = "MONTHS")
 public class CreditCard implements Model {
   @Constant(name = "Initial Balance")
   public long initial_balance = 400;

@@ -1,14 +1,14 @@
 package org.example.models.conway;
 
-import providence.simucore.Model;
-import providence.simucore.abm.AgentSystem;
-import providence.simucore.abm.LongAccumulator;
-import providence.simucore.abm.topology.Group;
-import providence.simucore.abm.topology.linker.GridConnected;
-import providence.simucore.annotations.Variable;
+import simudyne.core.Model;
+import simudyne.core.abm.AgentSystem;
+import simudyne.core.abm.LongAccumulator;
+import simudyne.core.abm.topology.Group;
+import simudyne.core.abm.topology.linker.GridConnected;
+import simudyne.core.annotations.Variable;
 
 public class GameOfLife implements Model {
-  private AgentSystem grid = AgentSystem.create();
+  @Variable public AgentSystem grid = AgentSystem.create();
   private LongAccumulator bornAccumulator = grid.createLongAccumulator("born");
   private LongAccumulator diedAccumulator = grid.createLongAccumulator("died");
 
@@ -35,7 +35,7 @@ public class GameOfLife implements Model {
                 init -> {
                   boolean alive = init.getPrng().uniform(0.0, 1.0).sample() < 0.25;
 
-                  init.spawn(new Cell(alive));
+                  return new Cell(alive);
                 });
 
     cellsGroup.connect(new GridConnected().wrapped().mooreConnected());

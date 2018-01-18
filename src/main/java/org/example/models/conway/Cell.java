@@ -1,8 +1,8 @@
 package org.example.models.conway;
 
-import providence.simucore.abm.Agent;
-import providence.simucore.abm.AgentEnvironment;
-import providence.simucore.annotations.Variable;
+import simudyne.core.abm.Agent;
+import simudyne.core.abm.AgentEnvironment;
+import simudyne.core.annotations.Variable;
 
 public class Cell implements Agent {
   @Variable public boolean alive;

@@ -1,6 +1,6 @@
 import org.example.models.CreditCard;
 import org.example.models.conway.GameOfLife;
-import providence.simucom.Server;
+import simudyne.nexus.Server;
 
 public class Main {
   public static void main(String[] args) {

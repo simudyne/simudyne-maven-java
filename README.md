@@ -1,9 +1,9 @@
-# Providence Maven Skeleton
+# Simudyne Maven Java Skeleton
 
-This repository serves as a simple working example of using Providence using the Maven build tool. You will need Maven 
-installed locally yourself, or provided through an IDE such as Eclipe or IntelliJ. Because Providence jars are served
-from an authenticated artifact repository, you will need to provide information to Maven on where this repository is
-located and your credentials.
+This repository serves as a simple working example of using Simudyne from Java using the Maven build tool. You will need
+Maven installed locally yourself, or provided through an IDE such as Eclipe or IntelliJ. Because Simudyne jars are
+served from an authenticated artifact repository, you will need to provide information to Maven on where this repository
+is located and your credentials.
 
 These settings are located in the `settings.xml` file in this repository. However, these settings are usually located at
 `~/.m2/settings.xml`. You can pass the `-s settings.xml` option to point maven at these settings yourself manually,
