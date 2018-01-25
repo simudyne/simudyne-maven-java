@@ -14,7 +14,7 @@ the `settings.xml` file.**
 ## Running the project
 
 Included in the pom.xml is configuration for the `exec-maven-plugin`, so you can run the compiled project via
-`mvn -s settings.xml exec:java`, which will call the Main.main method.
+`mvn -s settings.xml clean compile exec:java`, which will compile the project and then call the Main.main method.
 
 ## Distributing the project with Spark
 
