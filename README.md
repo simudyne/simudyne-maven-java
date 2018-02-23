@@ -19,5 +19,3 @@ Included in the pom.xml is configuration for the `exec-maven-plugin`, so you can
 ## Distributing the project with Spark
 
 You can start your distributed project from the preconfigured project for Maven and Spark : [https://bitbucket.org/simudyne/simudyne-maven-java-spark](https://bitbucket.org/simudyne/simudyne-maven-java-spark)
-
-Or you can follow [those instructions](https://docs.simudyne.com/v2.0/docs/adding-spark-to-your-simudyne-maven-java-project) to distribute an existing Simudyne Maven Java project. 
