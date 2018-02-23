@@ -1,52 +1,56 @@
 package org.example.models.conway;
 
 import simudyne.core.Model;
+import simudyne.core.abm.Action;
 import simudyne.core.abm.AgentSystem;
-import simudyne.core.abm.LongAccumulator;
+import simudyne.core.abm.GlobalState;
+import simudyne.core.abm.Sequence;
 import simudyne.core.abm.topology.Group;
-import simudyne.core.abm.topology.linker.GridConnected;
-import simudyne.core.annotations.Variable;
+import simudyne.core.annotations.*;
+import simudyne.core.graph.BlankLink;
+import simudyne.core.graph.LongAccumulator;
 
+@ModelSettings(macroStep = 25)
 public class GameOfLife implements Model {
-  @Variable public AgentSystem grid = AgentSystem.create();
+  public static class Globals extends GlobalState {
+    @Constant public float initiallyAlive = 0.25f;
+  }
+
+  @Custom public AgentSystem<Globals> grid = AgentSystem.create(new Globals());
+
   private LongAccumulator bornAccumulator = grid.createLongAccumulator("born");
   private LongAccumulator diedAccumulator = grid.createLongAccumulator("died");
 
   @Variable
   public long aliveCells() {
-    return grid.selectAgents(Cell.class).filter(agent -> agent.alive).count();
+    return grid.select(Cell.class).filter(agent -> agent.alive).count();
   }
 
-  @Variable
-  public long born() {
-    return bornAccumulator.value();
-  }
-
-  @Variable
-  public long died() {
-    return diedAccumulator.value();
-  }
+  @Constant
+  public int gridSize = 20;
 
   public void setup() {
-    Group cellsGroup =
-        grid.getTopology()
-            .generateGroup(
-                100 * 100,
-                init -> {
-                  boolean alive = init.getPrng().uniform(0.0, 1.0).sample() < 0.25;
+    Group<Cell> cellsGroup =
+        grid.generateGroup(
+            Cell.class,
+            gridSize * gridSize,
+            cell -> {
+              cell.alive =
+                  cell.getPrng().uniform(0.0, 1.0).sample() < cell.getGlobals().initiallyAlive;
+            });
 
-                  return new Cell(alive);
-                });
-
-    cellsGroup.connect(new GridConnected().wrapped().mooreConnected());
+    cellsGroup.gridConnected(BlankLink.class).wrapped();
 
     grid.setup();
   }
 
-  public void calculate() {
+  public void step() {
     bornAccumulator.reset();
     diedAccumulator.reset();
 
-    grid.calculate(new Messages.Start());
+    Sequence.create(
+            Action.create(Cell.class, Cell::onStart),
+            Action.create(Cell.class, Cell::onNeighbourMessages))
+        .run(grid);
   }
 }

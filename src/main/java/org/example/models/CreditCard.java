@@ -35,13 +35,13 @@ public class CreditCard implements Model {
     return interest_charge() + (isSpending ? spending : 0);
   }
 
-  // SDModel Interface Methods
+  // Model Interface Methods
 
   public void setup() {
     balance = initial_balance;
   }
 
-  public void calculate() {
+  public void step() {
     balance += balance_additions() - repayment;
 
     if (balance < 0) {
