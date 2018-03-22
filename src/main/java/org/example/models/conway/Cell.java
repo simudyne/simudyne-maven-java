@@ -1,24 +1,30 @@
 package org.example.models.conway;
 
+import simudyne.core.abm.Action;
 import simudyne.core.abm.Agent;
 import simudyne.core.annotations.Variable;
+import simudyne.core.functions.SerializableConsumer;
 import simudyne.core.graph.Message;
 
 import java.util.List;
 
 public class Cell extends Agent<GameOfLife.Globals> {
+  public static Action<Cell> action(SerializableConsumer<Cell> action) {
+    return Action.create(Cell.class, action);
+  }
+
   @Variable public boolean alive;
 
   public void onStart() {
-    broadcastMessage(alive);
+    broadcastMessage(new Messages.Neighbour(alive));
   }
 
   public void onNeighbourMessages() {
     long count = 0;
 
-    List<Message<Boolean>> messages = getMessagesOfType(Boolean.class);
-    for (Message<Boolean> m : messages) {
-      if (m.getBody()) {
+    List<Message<Messages.Neighbour>> messages = getMessagesOfType(Messages.Neighbour.class);
+    for (Message<Messages.Neighbour> m : messages) {
+      if (m.getBody().alive) {
         count += 1;
       }
     }
