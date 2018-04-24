@@ -12,6 +12,7 @@
     <properties>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
+        <simudyne.version>2.0.0</simudyne.version>
     </properties>
 
     <distributionManagement>
@@ -26,22 +27,22 @@
         <dependency>
             <groupId>simudyne</groupId>
             <artifactId>simudyne-nexus-server_2.11</artifactId>
-            <version>2.0.0-beta.3</version>
+            <version>${simudyne.version}</version>
         </dependency>
         <dependency>
             <groupId>simudyne</groupId>
             <artifactId>simudyne-core_2.11</artifactId>
-            <version>2.0.0-beta.3</version>
+            <version>${simudyne.version}</version>
         </dependency>
         <dependency>
             <groupId>simudyne</groupId>
             <artifactId>simudyne-core-abm_2.11</artifactId>
-            <version>2.0.0-beta.3</version>
+            <version>${simudyne.version}</version>
         </dependency>
 		<dependency>
             <groupId>simudyne</groupId>
             <artifactId>simudyne-core-graph_2.11</artifactId>
-            <version>2.0.0-beta.3</version>
+            <version>${simudyne.version}</version>
         </dependency>
     </dependencies>
 

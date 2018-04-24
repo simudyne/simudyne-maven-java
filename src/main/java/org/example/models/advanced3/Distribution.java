@@ -1,7 +1,7 @@
 package org.example.models.advanced3;
 
 import org.apache.commons.math3.random.EmpiricalDistribution;
-import simudyne.core.util.SeededRandom;
+import simudyne.core.rng.SeededRandom;
 
 import java.util.ArrayList;
 import java.util.List;

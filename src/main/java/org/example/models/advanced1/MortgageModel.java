@@ -5,15 +5,12 @@ import simudyne.core.abm.AgentBasedModel;
 import simudyne.core.abm.GlobalState;
 import simudyne.core.abm.Group;
 import simudyne.core.annotations.Input;
-import simudyne.core.annotations.Variable;
-import simudyne.core.graph.LongAccumulator;
 
 public class MortgageModel extends AgentBasedModel<GlobalState> {
-  @Variable(name = "Bank Equity (£)")
-  LongAccumulator accEquity = createLongAccumulator("equity");
-
-  @Variable(name = "assets")
-  LongAccumulator accAssets = createLongAccumulator("assets");
+  {
+    createLongAccumulator("equity", "Bank Equity (£)");
+    createLongAccumulator("assets");
+  }
 
   @Input(name = "Number of Households")
   long nbHouseholds = 100;

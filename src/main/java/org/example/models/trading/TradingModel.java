@@ -6,9 +6,6 @@ import simudyne.core.abm.Group;
 import simudyne.core.annotations.Constant;
 import simudyne.core.annotations.Input;
 import simudyne.core.annotations.ModelSettings;
-import simudyne.core.annotations.Variable;
-import simudyne.core.graph.DoubleAccumulator;
-import simudyne.core.graph.LongAccumulator;
 
 import java.util.Random;
 
@@ -31,14 +28,11 @@ public class TradingModel extends AgentBasedModel<TradingModel.Globals> {
     public double informationSignal = new Random().nextGaussian() * volatilityInfo;
   }
 
-  @Variable(name = "Number of buy orders")
-  public LongAccumulator buys = createLongAccumulator("buys");
-
-  @Variable(name = "Number of sell orders")
-  public LongAccumulator sells = createLongAccumulator("sells");
-
-  @Variable(name = "Price")
-  public DoubleAccumulator priceAccumulator = createDoubleAccumulator("price");
+  {
+    createLongAccumulator("buys", "Number of buy orders");
+    createLongAccumulator("sells", "Number of sell orders");
+    createDoubleAccumulator("price", "Price");
+  }
 
   @Override
   public void setup() {

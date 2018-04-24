@@ -23,20 +23,11 @@ public class GameOfLife extends AgentBasedModel<GameOfLife.Globals> {
   }
 
   {
-    registerAgentType(Cell.class);
-    registerMessageTypes(Messages.Start.class, Messages.Neighbour.class);
-
     createLongAccumulator("born");
     createLongAccumulator("died");
   }
 
   public void setup() {
-    if (distributed) {
-      getConfig()
-          .setString(
-              "core-abm.backend-implementation", "simudyne.core.graph.spark.SparkGraphBackend");
-    }
-
     Group<Cell> cellsGroup =
         generateGroup(
             Cell.class,
