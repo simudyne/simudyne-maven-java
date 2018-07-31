@@ -15,13 +15,13 @@
         <simudyne.version>2.0.3</simudyne.version>
     </properties>
 
-    <distributionManagement>
+    <repositories>
         <repository>
             <id>simudyne.jfrog.io</id>
             <name>simudyne.jfrog.io</name>
             <url>https://simudyne.jfrog.io/simudyne/releases</url>
         </repository>
-    </distributionManagement>
+    </repositories>
 
     <dependencies>
         <dependency>
