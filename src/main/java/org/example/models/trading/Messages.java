@@ -1,7 +1,11 @@
 package org.example.models.trading;
 
-public class Messages {
-  public static class BuyOrderPlaced {}
+import simudyne.core.graph.Message;
 
-  public static class SellOrderPlaced {}
+public class Messages {
+  public static class BuyOrderPlaced extends Message.Empty {}
+
+  public static class SellOrderPlaced extends Message.Empty {}
+
+  public static class MarketPriceChange extends Message.Double {}
 }

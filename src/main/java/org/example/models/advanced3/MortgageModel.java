@@ -8,6 +8,7 @@ import simudyne.core.abm.Group;
 import simudyne.core.annotations.Input;
 import simudyne.core.annotations.ModelSettings;
 import simudyne.core.annotations.Variable;
+import simudyne.core.graph.LongAccumulator;
 
 @ModelSettings(macroStep = 120)
 public class MortgageModel extends AgentBasedModel<MortgageModel.Globals> {
@@ -43,16 +44,22 @@ public class MortgageModel extends AgentBasedModel<MortgageModel.Globals> {
     public double stage2Provisions = 0.0;
   }
 
-  {
-    createLongAccumulator("equity", "Bank Equity (£)");
-    createLongAccumulator("badLoans", "Bad Loans");
-    createLongAccumulator("writeOffs", "Write-offs");
-    createLongAccumulator("impairments", "Impairments (£k)");
-    createLongAccumulator("debt", "Debt");
-    createLongAccumulator("income", "Income");
-    createLongAccumulator("mortgages", "Mortgages");
-    createLongAccumulator("assets", "Assets");
-  }
+  @Variable(name = "Bank Equity (£)")
+  public LongAccumulator accEquity = createLongAccumulator("equity");
+
+  @Variable(name = "Bad Loans")
+  public LongAccumulator accBadLoans = createLongAccumulator("badLoans");
+
+  @Variable(name = "Write-offs")
+  public LongAccumulator accWriteOffs = createLongAccumulator("writeOffs");
+
+  @Variable(name = "Impairments (£k)")
+  public LongAccumulator accImpairments = createLongAccumulator("impairments");
+
+  public LongAccumulator accDebt = createLongAccumulator("debt");
+  public LongAccumulator accIncome = createLongAccumulator("income");
+  public LongAccumulator accMortgages = createLongAccumulator("mortgages");
+  public LongAccumulator accAssets = createLongAccumulator("assets");
 
   public EmpiricalDistribution incomeDist = new Distribution().getIncomeDistribution();
   public int wealth = 50000;
@@ -73,7 +80,7 @@ public class MortgageModel extends AgentBasedModel<MortgageModel.Globals> {
 
     Group<Bank> bankGroup = generateGroup(Bank.class, 1);
 
-    householdGroup.partitionConnected(bankGroup);
+    householdGroup.partitionConnected(bankGroup, Links.BankLink.class);
 
     super.setup();
   }

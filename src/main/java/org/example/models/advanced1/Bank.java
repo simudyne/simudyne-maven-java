@@ -3,7 +3,6 @@ package org.example.models.advanced1;
 import simudyne.core.abm.Agent;
 import simudyne.core.abm.GlobalState;
 import simudyne.core.annotations.Variable;
-import simudyne.core.graph.Message;
 
 import java.util.List;
 
@@ -12,8 +11,9 @@ public class Bank extends Agent<GlobalState> {
 
   public void updateBalanceSheet() {
     int assets = 0;
-    List<Message<Integer>> paymentMessages = getMessagesOfType(Integer.class);
-    for (Message<Integer> payment : paymentMessages) {
+    List<Messages.RepaymentAmount> paymentMessages =
+        getMessagesOfType(Messages.RepaymentAmount.class);
+    for (Messages.RepaymentAmount payment : paymentMessages) {
       assets += payment.getBody();
     }
 

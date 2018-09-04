@@ -1,5 +1,5 @@
 import org.example.models.conway.GameOfLife;
-import org.example.models.creditCard.CreditCard;
+import org.example.models.credit_card.CreditCard;
 import org.example.models.trading.TradingModel;
 import simudyne.nexus.Server;
 

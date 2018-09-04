@@ -4,7 +4,6 @@ import simudyne.core.abm.Action;
 import simudyne.core.abm.Agent;
 import simudyne.core.annotations.Variable;
 import simudyne.core.functions.SerializableConsumer;
-import simudyne.core.graph.Message;
 
 import java.util.List;
 
@@ -16,15 +15,15 @@ public class Cell extends Agent<GameOfLife.Globals> {
   @Variable public boolean alive;
 
   public void onStart() {
-    broadcastMessage(new Messages.Neighbour(alive));
+    send(Messages.Alive.class, alive).along(Links.Neighbour.class).execute();
   }
 
   public void onNeighbourMessages() {
     long count = 0;
 
-    List<Message<Messages.Neighbour>> messages = getMessagesOfType(Messages.Neighbour.class);
-    for (Message<Messages.Neighbour> m : messages) {
-      if (m.getBody().alive) {
+    List<Messages.Alive> messages = getMessagesOfType(Messages.Alive.class);
+    for (Messages.Alive m : messages) {
+      if (m.getBody()) {
         count += 1;
       }
     }

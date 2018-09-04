@@ -1,13 +1,9 @@
 package org.example.models.conway;
 
+import simudyne.core.graph.Message;
+
 public class Messages {
-  public static class Neighbour {
-    public boolean alive;
+  public static class Alive extends Message.Boolean {}
 
-    public Neighbour(boolean alive) {
-      this.alive = alive;
-    }
-  }
-
-  public static class Start {}
+  public static class Start extends Message.Empty {}
 }

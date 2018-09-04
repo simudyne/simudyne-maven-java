@@ -34,18 +34,19 @@ public class Trader extends Agent<TradingModel.Globals> {
         trader -> {
           double updateFrequency = trader.getGlobals().updateFrequency;
           if (random.nextDouble() <= updateFrequency) {
-            trader.tradingThresh = trader.getMessageOfType(Double.class).getBody();
+            trader.tradingThresh =
+                trader.getMessageOfType(Messages.MarketPriceChange.class).getBody();
           }
         });
   }
 
   private void buy() {
     getLongAccumulator("buys").add(1);
-    broadcastMessage(new Messages.BuyOrderPlaced());
+    send(Messages.BuyOrderPlaced.class).along(Links.TradeLink.class).execute();
   }
 
   private void sell() {
     getLongAccumulator("sells").add(1);
-    broadcastMessage(new Messages.SellOrderPlaced());
+    send(Messages.SellOrderPlaced.class).along(Links.TradeLink.class).execute();
   }
 }

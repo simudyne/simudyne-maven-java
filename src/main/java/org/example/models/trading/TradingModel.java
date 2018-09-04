@@ -39,8 +39,8 @@ public class TradingModel extends AgentBasedModel<TradingModel.Globals> {
     Group<Trader> traderGroup = generateGroup(Trader.class, getGlobals().nbTraders);
     Group<Market> marketGroup = generateGroup(Market.class, 1);
 
-    traderGroup.fullyConnected(marketGroup);
-    marketGroup.fullyConnected(traderGroup);
+    traderGroup.fullyConnected(marketGroup, Links.TradeLink.class);
+    marketGroup.fullyConnected(traderGroup, Links.TradeLink.class);
 
     super.setup();
   }

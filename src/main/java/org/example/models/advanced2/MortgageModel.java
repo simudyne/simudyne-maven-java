@@ -6,20 +6,35 @@ import simudyne.core.abm.GlobalState;
 import simudyne.core.abm.Group;
 import simudyne.core.annotations.Input;
 import simudyne.core.annotations.ModelSettings;
+import simudyne.core.annotations.Variable;
+import simudyne.core.graph.LongAccumulator;
 
 @ModelSettings(macroStep = 120)
 public class MortgageModel extends AgentBasedModel<GlobalState> {
 
-  {
-    createLongAccumulator("equity", "Bank Equity (£)");
-    createLongAccumulator("badLoans", "Bad Loans");
-    createLongAccumulator("writeOffs", "Write-offs");
-    createLongAccumulator("impairments", "Impairments (£k)");
-    createLongAccumulator("debt", "Debt");
-    createLongAccumulator("income", "Income");
-    createLongAccumulator("mortgages", "Mortgages");
-    createLongAccumulator("assets", "Assets");
-  }
+  @Variable(name = "Bank Equity (£)")
+  LongAccumulator accEquity = createLongAccumulator("equity");
+
+  @Variable(name = "Bad Loans")
+  LongAccumulator accBadLoans = createLongAccumulator("badLoans");
+
+  @Variable(name = "Write-offs")
+  LongAccumulator accWriteOffs = createLongAccumulator("writeOffs");
+
+  @Variable(name = "Impairments (£k)")
+  LongAccumulator accImpairments = createLongAccumulator("impairments");
+
+  @Variable(name = "Debt")
+  LongAccumulator accDebt = createLongAccumulator("debt");
+
+  @Variable(name = "Income")
+  LongAccumulator accIncome = createLongAccumulator("income");
+
+  @Variable(name = "Mortgages")
+  LongAccumulator accMortgages = createLongAccumulator("mortgages");
+
+  @Variable(name = "Assets")
+  LongAccumulator accAssets = createLongAccumulator("assets");
 
   int income = 5000;
   int wealth = 50000;
@@ -40,7 +55,7 @@ public class MortgageModel extends AgentBasedModel<GlobalState> {
 
     Group<Bank> bankGroup = generateGroup(Bank.class, 1);
 
-    householdGroup.partitionConnected(bankGroup);
+    householdGroup.partitionConnected(bankGroup, Links.BankLink.class);
 
     super.setup();
   }

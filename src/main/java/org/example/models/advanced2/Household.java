@@ -27,12 +27,19 @@ public class Household extends Agent<GlobalState> {
         checkMaturity();
       } else {
         monthsInArrears += 1;
-        broadcastMessage(new Messages.Arrears(monthsInArrears, mortgage.amount));
+        send(
+                Messages.Arrears.class,
+                m -> {
+                  m.monthsInArrears = monthsInArrears;
+                  m.outstandingBalance = mortgage.amount;
+                })
+            .along(Links.BankLink.class)
+            .execute();
 
         // If we have spent more than 6 months in arrears,
         // default the mortgage (close it with 0 value).
         if (monthsInArrears > 6) {
-          broadcastMessage(new Messages.CloseMortgage(0));
+          send(Messages.MortgageCloseAmount.class, 0).along(Links.BankLink.class).execute();
           mortgage = null;
         }
       }
@@ -41,10 +48,19 @@ public class Household extends Agent<GlobalState> {
 
   private void checkMaturity() {
     if (mortgage.term == 0) {
-      broadcastMessage(new Messages.CloseMortgage(mortgage.amount));
+      send(Messages.MortgageCloseAmount.class, mortgage.amount)
+          .along(Links.BankLink.class)
+          .execute();
       mortgage = null;
     } else {
-      broadcastMessage(new Messages.Payment(mortgage.repayment, mortgage.amount));
+      send(
+              Messages.Payment.class,
+              m -> {
+                m.repayment = mortgage.repayment;
+                m.amount = mortgage.amount;
+              })
+          .along(Links.BankLink.class)
+          .execute();
     }
   }
 
@@ -58,7 +74,15 @@ public class Household extends Agent<GlobalState> {
         h -> {
           if (h.mortgage == null) {
             int purchasePrice = h.income * 4;
-            h.broadcastMessage(new Messages.MortgageApplication(purchasePrice, h.income, h.wealth));
+            h.send(
+                    Messages.MortgageApplication.class,
+                    m -> {
+                      m.amount = purchasePrice;
+                      m.income = h.income;
+                      m.wealth = h.wealth;
+                    })
+                .along(Links.BankLink.class)
+                .execute();
           }
         });
   }
@@ -72,10 +96,10 @@ public class Household extends Agent<GlobalState> {
                 message ->
                     h.mortgage =
                         new Mortgage(
-                            message.getBody().amount,
-                            message.getBody().amount,
-                            message.getBody().termInMonths,
-                            message.getBody().repayment)));
+                            message.amount,
+                            message.amount,
+                            message.termInMonths,
+                            message.repayment)));
   }
 
   public void incomeShock() {

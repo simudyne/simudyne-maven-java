@@ -1,20 +1,22 @@
-package org.example.models.creditCard;
+package org.example.models.credit_card;
 
 import simudyne.core.Model;
+import simudyne.core.annotations.Constant;
 import simudyne.core.annotations.Input;
 import simudyne.core.annotations.ModelSettings;
 import simudyne.core.annotations.Variable;
 
-@ModelSettings(timeUnit = "MONTHS", macroStep = 12)
+@ModelSettings(timeUnit = "MONTHS", macroStep = 100)
 public class CreditCard implements Model {
 
-  @Input(name = "Spending")
-  public boolean isSpending = true;
+  @Constant public long credit_limit = 0;
 
-  @Input(name = "Spending Amount")
+  @Input public boolean isSpending = true;
+
+  @Input(name = "Spending")
   public float spending = 250f;
 
-  @Input(name = "Repayment Amount")
+  @Input(name = "Repayment amount")
   public float repayment = 200f;
 
   @Input(name = "Interest Rate")
@@ -33,7 +35,7 @@ public class CreditCard implements Model {
     return interest_charge() + (isSpending ? spending : 0);
   }
 
-  // Model Interface Methods
+  // SDModel Interface Methods
 
   public void step() {
     balance += balance_additions() - repayment;

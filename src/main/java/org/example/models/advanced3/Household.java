@@ -35,17 +35,33 @@ public class Household extends Agent<MortgageModel.Globals> {
         checkMaturity();
       } else {
         monthsInArrears += 1;
-        broadcastMessage(new Messages.Arrears(monthsInArrears, mortgage.balanceOutstanding));
+        send(
+                Messages.Arrears.class,
+                m -> {
+                  m.monthsInArrears = monthsInArrears;
+                  m.outstandingBalance = mortgage.balanceOutstanding;
+                })
+            .along(Links.BankLink.class)
+            .execute();
       }
     }
   }
 
   private void checkMaturity() {
     if (mortgage.term == 0) {
-      broadcastMessage(new Messages.CloseMortgage(mortgage.amount));
+      send(Messages.CloseMortgageAmount.class, mortgage.amount)
+          .along(Links.BankLink.class)
+          .execute();
       mortgage = null;
     } else {
-      broadcastMessage(new Messages.Payment(mortgage.repayment, mortgage.amount));
+      send(
+              Messages.Payment.class,
+              m -> {
+                m.repayment = mortgage.repayment;
+                m.amount = mortgage.amount;
+              })
+          .along(Links.BankLink.class)
+          .execute();
     }
   }
 
@@ -60,8 +76,15 @@ public class Household extends Agent<MortgageModel.Globals> {
             if (h.mortgage == null) {
               if (h.getPrng().discrete(1, 5).sample() == 1) {
                 int purchasePrice = 100000 + h.income * 2;
-                h.broadcastMessage(
-                    new Messages.MortgageApplication(purchasePrice, h.income, h.wealth));
+                h.send(
+                        Messages.MortgageApplication.class,
+                        m -> {
+                          m.amount = purchasePrice;
+                          m.income = h.income;
+                          m.wealth = h.wealth;
+                        })
+                    .along(Links.BankLink.class)
+                    .execute();
               }
             }
           });
@@ -75,10 +98,10 @@ public class Household extends Agent<MortgageModel.Globals> {
                   message ->
                       h.mortgage =
                           new Mortgage(
-                              message.getBody().amount,
-                              message.getBody().amount,
-                              message.getBody().termInMonths,
-                              message.getBody().repayment)));
+                              message.amount,
+                              message.amount,
+                              message.termInMonths,
+                              message.repayment)));
 
   public void incomeShock() {
     // 50% of households gain volatility income, the other 50% lose it.
@@ -121,7 +144,7 @@ public class Household extends Agent<MortgageModel.Globals> {
   }
 
   public void writeOff() {
-    if (getMessageOfType(Boolean.class).getBody()) {
+    if (hasMessageOfType(Messages.LoanDefault.class)) {
       mortgage = null;
     }
   }

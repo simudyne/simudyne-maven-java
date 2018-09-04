@@ -17,7 +17,7 @@ public class Market extends Agent<TradingModel.Globals> {
           int netDemand = buys - sells;
 
           if (netDemand == 0) {
-            market.broadcastMessage(0);
+            market.send(Messages.MarketPriceChange.class, 0).along(Links.TradeLink.class).execute();
           } else {
             long nbTraders = market.getGlobals().nbTraders;
             double lambda = market.getGlobals().lambda;
@@ -25,7 +25,10 @@ public class Market extends Agent<TradingModel.Globals> {
             price += priceChange;
 
             market.getDoubleAccumulator("price").add(price);
-            market.broadcastMessage(priceChange);
+            market
+                .send(Messages.MarketPriceChange.class, price)
+                .along(Links.TradeLink.class)
+                .execute();
           }
         });
   }
