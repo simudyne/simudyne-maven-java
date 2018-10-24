@@ -7,9 +7,9 @@ import simudyne.core.annotations.Variable;
 import java.util.List;
 
 public class Bank extends Agent<GlobalState> {
-  @Variable int debt = 90;
+  @Variable private int debt = 90;
 
-  public void updateBalanceSheet() {
+  void updateBalanceSheet() {
     int assets = 0;
     List<Messages.RepaymentAmount> paymentMessages =
         getMessagesOfType(Messages.RepaymentAmount.class);

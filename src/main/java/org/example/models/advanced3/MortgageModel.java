@@ -100,7 +100,7 @@ public class MortgageModel extends AgentBasedModel<MortgageModel.Globals> {
               h.payTax();
               h.subsistenceConsumption();
               h.payMortgage();
-              h.discretionaryConsmption();
+              h.discretionaryConsumption();
             }),
         Action.create(
             Bank.class,

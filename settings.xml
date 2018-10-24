@@ -3,8 +3,8 @@
     <servers>
         <server>
             <id>simudyne.jfrog.io</id>
-            <username></username>
-            <password></password>
+            <username>simudyne.deployment</username>
+            <password>eyJ2ZXIiOiIyIiwidHlwIjoiSldUIiwiYWxnIjoiUlMyNTYiLCJraWQiOiJBVG51RXFKZk9nOHBxcE5QOUFKZTNGekJuQ1NDbG9HNnNBalJQTVVmbC1nIn0.eyJzdWIiOiJqZnJ0QDAxYnpxc3NnM2dyZWFoMTYzYmQ2dnExc3JzXC91c2Vyc1wvc2ltdWR5bmUuZGVwbG95bWVudCIsInNjcCI6Im1lbWJlci1vZi1ncm91cHM6Y2xpZW50cyBhcGk6KiIsImF1ZCI6ImpmcnRAMDFienFzc2czZ3JlYWgxNjNiZDZ2cTFzcnMiLCJpc3MiOiJqZnJ0QDAxYnpxc3NnM2dyZWFoMTYzYmQ2dnExc3JzIiwiaWF0IjoxNTEyNTYwNzIzLCJqdGkiOiIzNTRkNjBkZC1hYTU3LTRiZDYtYmIzMi1jM2ViNGRmZGExMTgifQ.Jwf5QooeM0PoInegI-FyeZaPYIWyYXyU6hrovXNAGewYLBSrd7UK9RimHXsHEnhZlQr0TbaauvKKdN91ffQIO9kFNlOaObcQVQG5CKBiWddU_Mr5yyTmXCgmec8LwRfAdG4AEMsWSUp9nYk41wIB1rbLcDhPdC3dUp4U6qo1FVcn9Pw3IYF_TI2OXki_XEiyDEoqv5phYWN_siAZoLE4d2lEmZcA7UmhG4dssI8UnxNSliDIxJFE9_Em66kmPmxxsB3l7vKelmOpd5qu51tW_jkodwyEVnNH5X49KWOu9dAgUFkXnQ9ym44zGVtZCRfq0Af4LfIiCyQcyWgm29QnxA</password>
         </server>
     </servers>
     <profiles>
@@ -13,7 +13,7 @@
             <repositories>
                 <repository>
                     <id>simudyne.jfrog.io</id>
-                    <url>https://simudyne.jfrog.io/simudyne/releases</url>
+                    <url>https://simudyne.jfrog.io/simudyne/previews</url>
                 </repository>
             </repositories>
         </profile>

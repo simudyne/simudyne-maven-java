@@ -4,8 +4,8 @@ import simudyne.core.graph.Message;
 
 public class Messages {
   public static class Arrears extends Message {
-    public int monthsInArrears;
-    public int outstandingBalance;
+    int monthsInArrears;
+    int outstandingBalance;
   }
 
   public static class LoanDefault extends Message.Empty {}
@@ -13,15 +13,15 @@ public class Messages {
   public static class CloseMortgageAmount extends Message.Integer {}
 
   public static class MortgageApplication extends Message {
-    public int amount;
-    public int income;
-    public int wealth;
+    int amount;
+    int income;
+    int wealth;
   }
 
   public static class ApplicationSuccessful extends Message {
-    public int amount;
-    public int termInMonths;
-    public int repayment;
+    int amount;
+    int termInMonths;
+    int repayment;
   }
 
   public static class Payment extends Message {

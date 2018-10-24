@@ -15,7 +15,7 @@ public class Cell extends Agent<GameOfLife.Globals> {
   @Variable public boolean alive;
 
   public void onStart() {
-    send(Messages.Alive.class, alive).along(Links.Neighbour.class).execute();
+    getLinks(Links.Neighbour.class).send(Messages.Alive.class, alive);
   }
 
   public void onNeighbourMessages() {

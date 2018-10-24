@@ -3,6 +3,7 @@ package org.example.models.trading;
 import simudyne.core.abm.Action;
 import simudyne.core.abm.Agent;
 import simudyne.core.annotations.Variable;
+import simudyne.core.functions.SerializableConsumer;
 
 import java.util.Random;
 
@@ -12,9 +13,12 @@ public class Trader extends Agent<TradingModel.Globals> {
 
   @Variable double tradingThresh = random.nextGaussian();
 
+  private static Action<Trader> action(SerializableConsumer<Trader> consumer) {
+    return Action.create(Trader.class, consumer);
+  }
+
   public static Action<Trader> processInformation() {
-    return Action.create(
-        Trader.class,
+    return action(
         trader -> {
           double informationSignal = trader.getGlobals().informationSignal;
 
@@ -29,8 +33,7 @@ public class Trader extends Agent<TradingModel.Globals> {
   }
 
   public static Action<Trader> updateThreshold() {
-    return Action.create(
-        Trader.class,
+    return action(
         trader -> {
           double updateFrequency = trader.getGlobals().updateFrequency;
           if (random.nextDouble() <= updateFrequency) {

@@ -7,13 +7,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.DoubleStream;
 
-public class Distribution {
+class Distribution {
   public class BucketInfo {
-    public final int min;
-    public final int max;
-    public final double p;
+    final int min;
+    final int max;
+    final double p;
 
-    public BucketInfo(int min, int max, double p) {
+    BucketInfo(int min, int max, double p) {
       this.min = min;
       this.max = max;
       this.p = p;
@@ -22,11 +22,10 @@ public class Distribution {
 
   private SeededRandom seededRandom = SeededRandom.create(42);
 
-  private List<BucketInfo> bucketInfo = new ArrayList<>();
+  private double[] samples;
 
-  public double[] samples;
-
-  public Distribution() {
+  Distribution() {
+    List<BucketInfo> bucketInfo = new ArrayList<>();
     bucketInfo.add(new BucketInfo(2200, 2800, 0.000832961));
     bucketInfo.add(new BucketInfo(2800, 3600, 0.006795891));
     bucketInfo.add(new BucketInfo(3600, 4700, 0.010746074));
@@ -57,7 +56,7 @@ public class Distribution {
             .toArray();
   }
 
-  public EmpiricalDistribution getIncomeDistribution() {
+  EmpiricalDistribution getIncomeDistribution() {
     EmpiricalDistribution empiricalDistribution = new EmpiricalDistribution();
     empiricalDistribution.load(samples);
     return empiricalDistribution;

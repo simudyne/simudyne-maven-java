@@ -36,8 +36,8 @@ public class MortgageModel extends AgentBasedModel<GlobalState> {
   @Variable(name = "Assets")
   LongAccumulator accAssets = createLongAccumulator("assets");
 
-  int income = 5000;
-  int wealth = 50000;
+  private int income = 5000;
+  private int wealth = 50000;
 
   @Input(name = "Number of Households")
   long nbHouseholds = 100;
@@ -69,7 +69,7 @@ public class MortgageModel extends AgentBasedModel<GlobalState> {
     run(
         Action.create(
             Household.class,
-            (Household h) -> {
+            h -> {
               h.incomeShock();
               h.earnIncome();
               h.consume();
@@ -77,7 +77,7 @@ public class MortgageModel extends AgentBasedModel<GlobalState> {
             }),
         Action.create(
             Bank.class,
-            (Bank b) -> {
+            b -> {
               b.accumulateIncome();
               b.processArrears();
               b.calculateImpairments();

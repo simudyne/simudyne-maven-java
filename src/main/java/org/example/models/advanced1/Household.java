@@ -5,20 +5,20 @@ import simudyne.core.abm.GlobalState;
 import simudyne.core.annotations.Variable;
 
 public class Household extends Agent<GlobalState> {
-  @Variable int income = 5000;
-  @Variable int consumption = 3000;
-  @Variable int wealth = 1000;
-  @Variable int repayment = 100;
+  @Variable private int income = 5000;
+  @Variable private int consumption = 3000;
+  @Variable private int wealth = 1000;
+  @Variable private int repayment = 100;
 
-  public void consume() {
+  void consume() {
     wealth -= consumption;
   }
 
-  public void earnIncome() {
+  void earnIncome() {
     wealth += income;
   }
 
-  public void payMortgage() {
+  void payMortgage() {
     if (canPay()) {
       send(Messages.RepaymentAmount.class, repayment).along(Links.BankLink.class).execute();
     }

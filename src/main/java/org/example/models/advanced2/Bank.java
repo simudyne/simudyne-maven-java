@@ -4,20 +4,18 @@ import simudyne.core.abm.Action;
 import simudyne.core.abm.Agent;
 import simudyne.core.abm.GlobalState;
 import simudyne.core.annotations.Variable;
+import simudyne.core.functions.SerializableConsumer;
 
 public class Bank extends Agent<GlobalState> {
-  @Variable
-  int debt = 0;
-  @Variable
-  int assets = 10000000;
+  @Variable private int debt = 0;
+  @Variable private int assets = 10000000;
 
   @Variable
-  int equity() {
+  private int equity() {
     return assets - debt;
   }
 
-  @Variable
-  private int nbMortgages = 0;
+  @Variable private int nbMortgages = 0;
 
   private int termInYears = 15; // Should be 25
   private double interest = 1.05;
@@ -29,9 +27,12 @@ public class Bank extends Agent<GlobalState> {
   private double LTILimit = 4.5;
   private double LTVLimit = 0.95;
 
-  public static Action<Bank> processApplication() {
-    return new Action<>(
-        Bank.class,
+  private static Action<Bank> action(SerializableConsumer<Bank> consumer) {
+    return Action.create(Bank.class, consumer);
+  }
+
+  static Action<Bank> processApplication() {
+    return action(
         bank ->
             bank.getMessagesOfType(Messages.MortgageApplication.class)
                 .stream()
@@ -48,14 +49,13 @@ public class Bank extends Agent<GlobalState> {
                                     (int) ((m.amount * bank.interest) / bank.termInMonths);
                               })
                           .to(m.getSender());
-
                       bank.nbMortgages += 1;
                       bank.assets += m.amount;
                       bank.debt += m.amount;
                     }));
   }
 
-  public void accumulateIncome() {
+  void accumulateIncome() {
     income = 0;
 
     getMessagesOfType(Messages.Payment.class).forEach(payment -> income += payment.repayment);
@@ -68,7 +68,7 @@ public class Bank extends Agent<GlobalState> {
    * Record how many bad loans the bank has. A loan is counted as bad if it has been more than 3
    * months in arrears.
    */
-  public void processArrears() {
+  void processArrears() {
     getMessagesOfType(Messages.Arrears.class)
         .forEach(
             arrears -> {
@@ -79,7 +79,7 @@ public class Bank extends Agent<GlobalState> {
   }
 
   /** Calculate impairments from written off loans. */
-  public void calculateImpairments() {
+  void calculateImpairments() {
     impairments = 0;
 
     getMessagesOfType(Messages.Arrears.class)
@@ -99,7 +99,7 @@ public class Bank extends Agent<GlobalState> {
   }
 
   /** Remove any mortgages that have closed from the books. */
-  public void clearPaidMortgages() {
+  void clearPaidMortgages() {
     int balancePaidOff = 0;
 
     for (Messages.MortgageCloseAmount close :
@@ -112,7 +112,7 @@ public class Bank extends Agent<GlobalState> {
     assets -= balancePaidOff;
   }
 
-  public void updateAccumulators() {
+  void updateAccumulators() {
     getLongAccumulator("debt").add(debt);
     getLongAccumulator("impairments").add(impairments);
     getLongAccumulator("mortgages").add(nbMortgages);

@@ -14,5 +14,6 @@ public class Main {
         "Mortgage Tutorial: Intermediate", org.example.models.advanced2.MortgageModel.class);
     Server.register("Mortgage Tutorial: Final", org.example.models.advanced3.MortgageModel.class);
     Server.run();
+
   }
 }

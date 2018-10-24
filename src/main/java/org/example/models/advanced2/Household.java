@@ -4,20 +4,25 @@ import simudyne.core.abm.Action;
 import simudyne.core.abm.Agent;
 import simudyne.core.abm.GlobalState;
 import simudyne.core.annotations.Variable;
+import simudyne.core.functions.SerializableConsumer;
+import simudyne.core.graph.Message;
 
 public class Household extends Agent<GlobalState> {
   @Variable int income;
   @Variable int wealth = 1000;
 
-  Mortgage mortgage;
-  int monthsInArrears = 0;
-  int consumption = 3000;
+  private Mortgage mortgage;
+  private int monthsInArrears = 0;
 
-  public void earnIncome() {
+  private static Action<Household> action(SerializableConsumer<Household> consumer) {
+    return Action.create(Household.class, consumer);
+  }
+
+  void earnIncome() {
     wealth += income;
   }
 
-  public void payMortgage() {
+  void payMortgage() {
     if (mortgage != null) {
       if (canPay()) {
         wealth -= mortgage.repayment;
@@ -27,19 +32,17 @@ public class Household extends Agent<GlobalState> {
         checkMaturity();
       } else {
         monthsInArrears += 1;
-        send(
+        getLinks(Links.BankLink.class)
+            .send(
                 Messages.Arrears.class,
-                m -> {
-                  m.monthsInArrears = monthsInArrears;
-                  m.outstandingBalance = mortgage.amount;
-                })
-            .along(Links.BankLink.class)
-            .execute();
-
+                ((arrears, bankLink) -> {
+                  arrears.monthsInArrears = monthsInArrears;
+                  arrears.outstandingBalance = monthsInArrears;
+                }));
         // If we have spent more than 6 months in arrears,
         // default the mortgage (close it with 0 value).
         if (monthsInArrears > 6) {
-          send(Messages.MortgageCloseAmount.class, 0).along(Links.BankLink.class).execute();
+          getLinks(Links.BankLink.class).send(Messages.MortgageCloseAmount.class, 0);
           mortgage = null;
         }
       }
@@ -48,19 +51,16 @@ public class Household extends Agent<GlobalState> {
 
   private void checkMaturity() {
     if (mortgage.term == 0) {
-      send(Messages.MortgageCloseAmount.class, mortgage.amount)
-          .along(Links.BankLink.class)
-          .execute();
+      getLinks(Links.BankLink.class).send(Messages.MortgageCloseAmount.class, mortgage.amount);
       mortgage = null;
     } else {
-      send(
+      getLinks(Links.BankLink.class)
+          .send(
               Messages.Payment.class,
-              m -> {
-                m.repayment = mortgage.repayment;
-                m.amount = mortgage.amount;
-              })
-          .along(Links.BankLink.class)
-          .execute();
+              ((payment, bankLink) -> {
+                payment.repayment = mortgage.repayment;
+                payment.amount = mortgage.amount;
+              }));
     }
   }
 
@@ -68,28 +68,25 @@ public class Household extends Agent<GlobalState> {
     return (mortgage == null) || (wealth >= mortgage.repayment);
   }
 
-  public static Action<Household> applyForMortgage() {
-    return Action.create(
-        Household.class,
+  static Action<Household> applyForMortgage() {
+    return action(
         h -> {
           if (h.mortgage == null) {
             int purchasePrice = h.income * 4;
-            h.send(
+            h.getLinks(Links.BankLink.class)
+                .send(
                     Messages.MortgageApplication.class,
-                    m -> {
-                      m.amount = purchasePrice;
-                      m.income = h.income;
-                      m.wealth = h.wealth;
-                    })
-                .along(Links.BankLink.class)
-                .execute();
+                    ((mortgageApplication, bankLink) -> {
+                      mortgageApplication.amount = purchasePrice;
+                      mortgageApplication.income = h.income;
+                      mortgageApplication.wealth = h.wealth;
+                    }));
           }
         });
   }
 
-  public static Action<Household> takeOutMortgage() {
-    return Action.create(
-        Household.class,
+  static Action<Household> takeOutMortgage() {
+    return action(
         h ->
             h.hasMessageOfType(
                 Messages.ApplicationSuccessful.class,
@@ -102,7 +99,7 @@ public class Household extends Agent<GlobalState> {
                             message.repayment)));
   }
 
-  public void incomeShock() {
+  void incomeShock() {
     income += 200 * getPrng().gaussian(0, 1).sample();
 
     if (income < 0) {
@@ -110,7 +107,8 @@ public class Household extends Agent<GlobalState> {
     }
   }
 
-  public void consume() {
+  void consume() {
+    int consumption = 3000;
     wealth -= consumption;
 
     if (wealth < 0) {
@@ -124,7 +122,7 @@ public class Household extends Agent<GlobalState> {
     private int term;
     private int repayment;
 
-    public Mortgage(int amount, int balanceOutstanding, int term, int repayment) {
+    Mortgage(int amount, int balanceOutstanding, int term, int repayment) {
       this.amount = amount;
       this.balanceOutstanding = balanceOutstanding;
       this.term = term;

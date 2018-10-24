@@ -3,6 +3,7 @@ package org.example.models.advanced3;
 import simudyne.core.abm.Action;
 import simudyne.core.abm.Agent;
 import simudyne.core.annotations.Variable;
+import simudyne.core.functions.SerializableConsumer;
 
 public class Household extends Agent<MortgageModel.Globals> {
   @Variable int income;
@@ -21,11 +22,15 @@ public class Household extends Agent<MortgageModel.Globals> {
   Mortgage mortgage;
   int monthsInArrears = 0;
 
-  public void earnIncome() {
+  private static Action<Household> action(SerializableConsumer<Household> consumer) {
+    return Action.create(Household.class, consumer);
+  }
+
+  void earnIncome() {
     wealth += income / 12;
   }
 
-  public void payMortgage() {
+  void payMortgage() {
     if (mortgage != null) {
       if (canPay()) {
         wealth -= mortgage.repayment;
@@ -35,33 +40,29 @@ public class Household extends Agent<MortgageModel.Globals> {
         checkMaturity();
       } else {
         monthsInArrears += 1;
-        send(
+        getLinks(Links.BankLink.class)
+            .send(
                 Messages.Arrears.class,
-                m -> {
+                (m, l) -> {
                   m.monthsInArrears = monthsInArrears;
                   m.outstandingBalance = mortgage.balanceOutstanding;
-                })
-            .along(Links.BankLink.class)
-            .execute();
+                });
       }
     }
   }
 
   private void checkMaturity() {
     if (mortgage.term == 0) {
-      send(Messages.CloseMortgageAmount.class, mortgage.amount)
-          .along(Links.BankLink.class)
-          .execute();
+      getLinks(Links.BankLink.class).send(Messages.CloseMortgageAmount.class, mortgage.amount);
       mortgage = null;
     } else {
-      send(
+      getLinks(Links.BankLink.class)
+          .send(
               Messages.Payment.class,
-              m -> {
+              (m, l) -> {
                 m.repayment = mortgage.repayment;
                 m.amount = mortgage.amount;
-              })
-          .along(Links.BankLink.class)
-          .execute();
+              });
     }
   }
 
@@ -69,29 +70,26 @@ public class Household extends Agent<MortgageModel.Globals> {
     return wealth >= mortgage.repayment;
   }
 
-  public static Action<Household> applyForMortgage =
-      Action.create(
-          Household.class,
+  static Action<Household> applyForMortgage =
+      action(
           h -> {
             if (h.mortgage == null) {
               if (h.getPrng().discrete(1, 5).sample() == 1) {
                 int purchasePrice = 100000 + h.income * 2;
-                h.send(
+                h.getLinks(Links.BankLink.class)
+                    .send(
                         Messages.MortgageApplication.class,
-                        m -> {
+                        (m, l) -> {
                           m.amount = purchasePrice;
                           m.income = h.income;
                           m.wealth = h.wealth;
-                        })
-                    .along(Links.BankLink.class)
-                    .execute();
+                        });
               }
             }
           });
 
-  public static Action<Household> takeOutMortgage =
-      Action.create(
-          Household.class,
+  static Action<Household> takeOutMortgage =
+      action(
           h ->
               h.hasMessageOfType(
                   Messages.ApplicationSuccessful.class,
@@ -103,7 +101,7 @@ public class Household extends Agent<MortgageModel.Globals> {
                               message.termInMonths,
                               message.repayment)));
 
-  public void incomeShock() {
+  void incomeShock() {
     // 50% of households gain volatility income, the other 50% lose it.
     if (getPrng().discrete(1, 2).sample() == 1) {
       income += (getGlobals().incomeVolatility * income / 100);
@@ -116,18 +114,19 @@ public class Household extends Agent<MortgageModel.Globals> {
     }
   }
 
-  public void payTax() {
+  void payTax() {
     if (income < getGlobals().topRateThreshold) {
       taxBill = (int) ((income - getGlobals().personalAllowance) * getGlobals().basicRate / 100);
-    } else
+    } else {
       taxBill =
           (int)
               (((income - getGlobals().topRateThreshold) * getGlobals().topRate / 100)
                   + (income - getGlobals().personalAllowance) * getGlobals().basicRate / 100);
+    }
     wealth -= taxBill / 12;
   }
 
-  public void subsistenceConsumption() {
+  void subsistenceConsumption() {
     wealth -= 5900 / 12;
 
     if (wealth < 0) {
@@ -135,7 +134,7 @@ public class Household extends Agent<MortgageModel.Globals> {
     }
   }
 
-  public void discretionaryConsmption() {
+  void discretionaryConsumption() {
     int incomeAfterSubsistence = income - 5900;
     double minLiqWealth =
         4.07 * Math.log(incomeAfterSubsistence) - 33.1 + getPrng().gaussian(0, 1).sample();
@@ -143,7 +142,7 @@ public class Household extends Agent<MortgageModel.Globals> {
     wealth -= monthlyConsumption;
   }
 
-  public void writeOff() {
+  void writeOff() {
     if (hasMessageOfType(Messages.LoanDefault.class)) {
       mortgage = null;
     }

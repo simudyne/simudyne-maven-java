@@ -12,7 +12,7 @@ public class MortgageModel extends AgentBasedModel<GlobalState> {
   LongAccumulator accAssets = createLongAccumulator("assets", "Assets");
 
   @Input(name = "Number of Households")
-  long nbHouseholds = 100;
+  private long nbHouseholds = 100;
 
   @Override
   public void setup() {
@@ -38,10 +38,6 @@ public class MortgageModel extends AgentBasedModel<GlobalState> {
               household.consume();
               household.payMortgage();
             }),
-        Action.create(
-            Bank.class,
-            bank -> {
-              bank.updateBalanceSheet();
-            }));
+        Action.create(Bank.class, Bank::updateBalanceSheet));
   }
 }
