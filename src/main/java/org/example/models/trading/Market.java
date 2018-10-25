@@ -29,7 +29,7 @@ public class Market extends Agent<TradingModel.Globals> {
             price += priceChange;
 
             market.getDoubleAccumulator("price").add(price);
-            market.getLinks(Links.TradeLink.class).send(Messages.MarketPriceChange.class, price);
+            market.getLinks(Links.TradeLink.class).send(Messages.MarketPriceChange.class, priceChange);
           }
         });
   }

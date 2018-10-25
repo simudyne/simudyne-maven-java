@@ -45,11 +45,11 @@ public class Trader extends Agent<TradingModel.Globals> {
 
   private void buy() {
     getLongAccumulator("buys").add(1);
-    send(Messages.BuyOrderPlaced.class).along(Links.TradeLink.class).execute();
+    getLinks(Links.TradeLink.class).send(Messages.BuyOrderPlaced.class);
   }
 
   private void sell() {
     getLongAccumulator("sells").add(1);
-    send(Messages.SellOrderPlaced.class).along(Links.TradeLink.class).execute();
+    getLinks(Links.TradeLink.class).send(Messages.SellOrderPlaced.class);
   }
 }
