@@ -44,16 +44,12 @@ public class MortgageModel extends AgentBasedModel<MortgageModel.Globals> {
     public double stage2Provisions = 0.0;
   }
 
-  @Variable(name = "Bank Equity (£)")
   public LongAccumulator accEquity = createLongAccumulator("equity");
 
-  @Variable(name = "Bad Loans")
   public LongAccumulator accBadLoans = createLongAccumulator("badLoans");
 
-  @Variable(name = "Write-offs")
   public LongAccumulator accWriteOffs = createLongAccumulator("writeOffs");
 
-  @Variable(name = "Impairments (£k)")
   public LongAccumulator accImpairments = createLongAccumulator("impairments");
 
   public LongAccumulator accDebt = createLongAccumulator("debt");
