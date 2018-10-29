@@ -20,7 +20,7 @@ public class Household extends Agent<GlobalState> {
 
   void payMortgage() {
     if (canPay()) {
-      send(Messages.RepaymentAmount.class, repayment).along(Links.BankLink.class).execute();
+      getLinks(Links.BankLink.class).send(Messages.RepaymentAmount.class, repayment);
     }
   }
 
