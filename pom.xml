@@ -19,7 +19,7 @@
     <repository>
       <id>simudyne.jfrog.io</id>
       <name>simudyne.jfrog.io</name>
-      <url>https://simudyne.jfrog.io/simudyne/previews</url>
+      <url>https://simudyne.jfrog.io/simudyne/releases/</url>
     </repository>
   </repositories>
 
