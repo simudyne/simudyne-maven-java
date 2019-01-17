@@ -72,16 +72,7 @@
                     <mainClass>Main</mainClass>
                 </configuration>
             </plugin>
-			<plugin>
-			<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.1</version>
-				<configuration>
-					<source>1.8</source>
-					<target>1.8</target>
-					<fork>true</fork>
-					<executable>C:\Program Files\Java\jdk1.8.0_181\bin\javac</executable>
-				</configuration>
-			</plugin>
+
             <plugin>
                 <groupId>simudyne</groupId>
                 <artifactId>simudyne-maven-plugin</artifactId>
