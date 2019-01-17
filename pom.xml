@@ -80,7 +80,7 @@
                 <configuration>
                     <input>./src/main/json/models</input>
                     <output>./src/main/java/models</output>
-                    <overwrite>true</overwrite>
+                    <overwrite>false</overwrite>
                 </configuration>
             </plugin>
 
