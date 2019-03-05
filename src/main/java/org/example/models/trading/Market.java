@@ -6,7 +6,7 @@ import simudyne.core.functions.SerializableConsumer;
 
 public class Market extends Agent<TradingModel.Globals> {
 
-  private static double price = 4.0;
+  double price = 4.0;
 
   private static Action<Market> action(SerializableConsumer<Market> consumer) {
     return Action.create(Market.class, consumer);
@@ -26,10 +26,12 @@ public class Market extends Agent<TradingModel.Globals> {
             long nbTraders = market.getGlobals().nbTraders;
             double lambda = market.getGlobals().lambda;
             double priceChange = (netDemand / (double) nbTraders) / lambda;
-            price += priceChange;
+            market.price += priceChange;
 
-            market.getDoubleAccumulator("price").add(price);
-            market.getLinks(Links.TradeLink.class).send(Messages.MarketPriceChange.class, priceChange);
+            market.getDoubleAccumulator("price").add(market.price);
+            market
+                .getLinks(Links.TradeLink.class)
+                .send(Messages.MarketPriceChange.class, priceChange);
           }
         });
   }
