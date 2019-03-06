@@ -6,26 +6,27 @@ import simudyne.core.abm.Group;
 import simudyne.core.annotations.Constant;
 import simudyne.core.annotations.Input;
 import simudyne.core.annotations.ModelSettings;
-
-import java.util.Random;
+import simudyne.core.rng.SeededRandom;
 
 @ModelSettings(macroStep = 100)
 public class TradingModel extends AgentBasedModel<TradingModel.Globals> {
 
+  private static final long SEED = 1000;
+
   public static final class Globals extends GlobalState {
     @Input(name = "Update Frequency")
-    public double updateFrequency = 0.01;
+    double updateFrequency = 0.01;
 
     @Constant(name = "Number of Traders")
-    public long nbTraders = 1000;
+    long nbTraders = 1000;
 
     @Input(name = "Lambda")
-    public double lambda = 10;
+    double lambda = 10;
 
     @Input(name = "Volatility of Information Signal")
-    public double volatilityInfo = 0.001;
+    double volatilityInfo = 0.001;
 
-    public double informationSignal = new Random().nextGaussian() * volatilityInfo;
+    double informationSignal = SeededRandom.create(SEED).generator.nextGaussian()*volatilityInfo;
   }
 
   {
@@ -49,7 +50,7 @@ public class TradingModel extends AgentBasedModel<TradingModel.Globals> {
   public void step() {
     super.step();
 
-    getGlobals().informationSignal = new Random().nextGaussian() * getGlobals().volatilityInfo;
+    getGlobals().informationSignal = SeededRandom.create(SEED).generator.nextGaussian() * getGlobals().volatilityInfo;
 
     run(Trader.processInformation(), Market.calcPriceImpact(), Trader.updateThreshold());
   }
