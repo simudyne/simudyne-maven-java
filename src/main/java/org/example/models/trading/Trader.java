@@ -1,17 +1,21 @@
 package org.example.models.trading;
 
+import org.apache.commons.math3.random.RandomGenerator;
 import simudyne.core.abm.Action;
 import simudyne.core.abm.Agent;
 import simudyne.core.annotations.Variable;
 import simudyne.core.functions.SerializableConsumer;
 
-import java.util.Random;
-
 public class Trader extends Agent<TradingModel.Globals> {
 
-  static Random random = new Random();
+  RandomGenerator random;
+  @Variable double tradingThresh;
 
-  @Variable double tradingThresh = random.nextGaussian();
+  @Override
+  public void init() {
+    random = this.getPrng().generator;
+    tradingThresh = random.nextGaussian();
+  }
 
   private static Action<Trader> action(SerializableConsumer<Trader> consumer) {
     return Action.create(Trader.class, consumer);
@@ -36,7 +40,7 @@ public class Trader extends Agent<TradingModel.Globals> {
     return action(
         trader -> {
           double updateFrequency = trader.getGlobals().updateFrequency;
-          if (random.nextDouble() <= updateFrequency) {
+          if (trader.random.nextDouble() <= updateFrequency) {
             trader.tradingThresh =
                 trader.getMessageOfType(Messages.MarketPriceChange.class).getBody();
           }
