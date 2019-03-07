@@ -7,34 +7,31 @@ import simudyne.core.annotations.Constant;
 import simudyne.core.annotations.Input;
 import simudyne.core.annotations.ModelSettings;
 
+import java.util.Random;
+
 @ModelSettings(macroStep = 100)
 public class TradingModel extends AgentBasedModel<TradingModel.Globals> {
 
   public static final class Globals extends GlobalState {
     @Input(name = "Update Frequency")
-    double updateFrequency = 0.01;
+    public double updateFrequency = 0.01;
 
     @Constant(name = "Number of Traders")
-    long nbTraders = 1000;
+    public long nbTraders = 1000;
 
     @Input(name = "Lambda")
-    double lambda = 10;
+    public double lambda = 10;
 
     @Input(name = "Volatility of Information Signal")
-    double volatilityInfo = 0.001;
+    public double volatilityInfo = 0.001;
 
-    double informationSignal;
+    public double informationSignal = new Random().nextGaussian() * volatilityInfo;
   }
 
   {
     createLongAccumulator("buys", "Number of buy orders");
     createLongAccumulator("sells", "Number of sell orders");
     createDoubleAccumulator("price", "Price");
-  }
-
-  @Override
-  public void init() {
-      getGlobals().informationSignal = getContext().getPRNG().generator.nextGaussian()*getGlobals().volatilityInfo;
   }
 
   @Override
@@ -52,8 +49,7 @@ public class TradingModel extends AgentBasedModel<TradingModel.Globals> {
   public void step() {
     super.step();
 
-    getGlobals().informationSignal = getContext().getPRNG().generator.nextGaussian()*getGlobals().volatilityInfo;
-
+    getGlobals().informationSignal = new Random().nextGaussian() * getGlobals().volatilityInfo;
 
     run(Trader.processInformation(), Market.calcPriceImpact(), Trader.updateThreshold());
   }
