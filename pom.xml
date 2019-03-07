@@ -12,7 +12,7 @@
     <properties>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
-        <simudyne.version>2.2.0</simudyne.version>
+        <simudyne.version>2.1.0</simudyne.version>
     </properties>
 
     <repositories>
