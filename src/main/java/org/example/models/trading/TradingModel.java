@@ -34,7 +34,8 @@ public class TradingModel extends AgentBasedModel<TradingModel.Globals> {
 
   @Override
   public void init() {
-      getGlobals().informationSignal = getContext().getPRNG().generator.nextGaussian()*getGlobals().volatilityInfo;
+    getGlobals().informationSignal =
+        getContext().getPRNG().generator.nextGaussian() * getGlobals().volatilityInfo;
   }
 
   @Override
@@ -52,8 +53,8 @@ public class TradingModel extends AgentBasedModel<TradingModel.Globals> {
   public void step() {
     super.step();
 
-    getGlobals().informationSignal = getContext().getPRNG().generator.nextGaussian()*getGlobals().volatilityInfo;
-
+    getGlobals().informationSignal =
+        getContext().getPRNG().generator.nextGaussian() * getGlobals().volatilityInfo;
 
     run(Trader.processInformation(), Market.calcPriceImpact(), Trader.updateThreshold());
   }
