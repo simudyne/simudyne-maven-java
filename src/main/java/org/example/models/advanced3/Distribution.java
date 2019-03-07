@@ -24,8 +24,6 @@ class Distribution {
 
   private double[] samples;
 
-  private static final long SEED = 9;
-
   Distribution() {
     List<BucketInfo> bucketInfo = new ArrayList<>();
     bucketInfo.add(new BucketInfo(2200, 2800, 0.000832961));
@@ -60,7 +58,6 @@ class Distribution {
 
   EmpiricalDistribution getIncomeDistribution() {
     EmpiricalDistribution empiricalDistribution = new EmpiricalDistribution();
-    empiricalDistribution.reSeed(SEED);
     empiricalDistribution.load(samples);
     return empiricalDistribution;
   }

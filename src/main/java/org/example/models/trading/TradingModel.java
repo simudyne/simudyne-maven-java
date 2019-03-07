@@ -12,18 +12,18 @@ public class TradingModel extends AgentBasedModel<TradingModel.Globals> {
 
   public static final class Globals extends GlobalState {
     @Input(name = "Update Frequency")
-    double updateFrequency = 0.01;
+    public double updateFrequency = 0.01;
 
     @Constant(name = "Number of Traders")
-    long nbTraders = 1000;
+    public long nbTraders = 1000;
 
     @Input(name = "Lambda")
-    double lambda = 10;
+    public double lambda = 10;
 
     @Input(name = "Volatility of Information Signal")
-    double volatilityInfo = 0.001;
+    public double volatilityInfo = 0.001;
 
-    double informationSignal;
+    public double informationSignal = new Random().nextGaussian() * volatilityInfo;
   }
 
   {
