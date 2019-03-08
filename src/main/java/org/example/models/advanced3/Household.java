@@ -4,6 +4,9 @@ import simudyne.core.abm.Action;
 import simudyne.core.abm.Agent;
 import simudyne.core.annotations.Variable;
 import simudyne.core.functions.SerializableConsumer;
+import simudyne.core.rng.SeededRandom;
+
+import java.util.Objects;
 
 public class Household extends Agent<MortgageModel.Globals> {
   @Variable int income;
@@ -21,6 +24,14 @@ public class Household extends Agent<MortgageModel.Globals> {
   int taxBill = 0;
   Mortgage mortgage;
   int monthsInArrears = 0;
+
+  // Extracting as a variable so that the randomness can be fixed (mocked) in the TestKit tests.
+  SeededRandom prng;
+
+  @Override
+  public void init() {
+    prng = getPrng();
+  }
 
   private static Action<Household> action(SerializableConsumer<Household> consumer) {
     return Action.create(Household.class, consumer);
@@ -74,7 +85,7 @@ public class Household extends Agent<MortgageModel.Globals> {
       action(
           h -> {
             if (h.mortgage == null) {
-              if (h.getPrng().discrete(1, 5).sample() == 1) {
+              if (h.prng.discrete(1, 5).sample() == 1) {
                 int purchasePrice = 100000 + h.income * 2;
                 h.getLinks(Links.BankLink.class)
                     .send(
@@ -149,16 +160,36 @@ public class Household extends Agent<MortgageModel.Globals> {
   }
 
   public static class Mortgage {
-    private int amount;
-    private int balanceOutstanding;
-    private int term;
-    private int repayment;
+    int amount;
+    int balanceOutstanding;
+    int term;
+    int repayment;
 
     public Mortgage(int amount, int balanceOutstanding, int term, int repayment) {
       this.amount = amount;
       this.balanceOutstanding = balanceOutstanding;
       this.term = term;
       this.repayment = repayment;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+      if (this == o) {
+        return true;
+      }
+      if (o == null || getClass() != o.getClass()) {
+        return false;
+      }
+      Mortgage mortgage = (Mortgage) o;
+      return amount == mortgage.amount
+          && balanceOutstanding == mortgage.balanceOutstanding
+          && term == mortgage.term
+          && repayment == mortgage.repayment;
+    }
+
+    @Override
+    public int hashCode() {
+      return Objects.hash(amount, balanceOutstanding, term, repayment);
     }
   }
 }

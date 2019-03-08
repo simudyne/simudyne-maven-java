@@ -2,24 +2,32 @@ package org.example.models.advanced3;
 
 import simudyne.core.abm.Action;
 import simudyne.core.abm.Agent;
+import simudyne.core.annotations.Variable;
 import simudyne.core.functions.SerializableConsumer;
 
 import java.util.List;
 
 public class Bank extends Agent<MortgageModel.Globals> {
-  private int debt = 0;
 
   private int termInYears = 15; // Should be 25
+
+  @Variable(name = "Stage 1 Provisions")
+  public double stage1Provisions = 0.0;
+
+  @Variable(name = "Stage 2 Provisions")
+  public double stage2Provisions = 0.0;
 
   private double interest() {
     return 1 + (getGlobals().interestRate / 100);
   }
 
   private int termInMonths = termInYears * 12;
-  private int assets = 10000000;
-  private int impairments = 0;
-  private int nbMortgages = 0;
-  private int income = 0;
+  final double NIM = 0.25;
+  int assets = 10000000;
+  int impairments = 0;
+  int nbMortgages = 0;
+  int income = 0;
+  int debt = 0;
 
   private int equity() {
     return assets - debt;
@@ -32,8 +40,7 @@ public class Bank extends Agent<MortgageModel.Globals> {
   static Action<Bank> processApplication =
       action(
           bank ->
-              bank.getMessagesOfType(Messages.MortgageApplication.class)
-                  .stream()
+              bank.getMessagesOfType(Messages.MortgageApplication.class).stream()
                   .filter(m -> m.amount / m.income <= bank.getGlobals().LTILimit)
                   .filter(m -> m.wealth > m.amount * (1 - bank.getGlobals().LTVLimit))
                   .forEach(
@@ -58,7 +65,6 @@ public class Bank extends Agent<MortgageModel.Globals> {
     income = 0;
     getMessagesOfType(Messages.Payment.class).forEach(payment -> income += payment.repayment);
 
-    double NIM = 0.25;
     assets += (income * NIM);
   }
 
@@ -69,8 +75,8 @@ public class Bank extends Agent<MortgageModel.Globals> {
     // Calculate provisions
     double stage1Provisions = calcStageOneProvisions(arrears);
     double stage2Provisions = calcStageTwoProvisions(arrears);
-    getGlobals().stage1Provisions = stage1Provisions * 0.01;
-    getGlobals().stage2Provisions = stage2Provisions * 0.03;
+    this.stage1Provisions = stage1Provisions * 0.01;
+    this.stage2Provisions = stage2Provisions * 0.03;
 
     writeLoans(arrears);
   }
@@ -102,16 +108,14 @@ public class Bank extends Agent<MortgageModel.Globals> {
   }
 
   private int calcStageTwoProvisions(List<Messages.Arrears> arrears) {
-    return arrears
-        .stream()
+    return arrears.stream()
         .filter(m -> m.monthsInArrears > 1 && m.monthsInArrears < 3)
         .mapToInt(m -> m.outstandingBalance)
         .sum();
   }
 
   private int calcStageOneProvisions(List<Messages.Arrears> arrears) {
-    return arrears
-        .stream()
+    return arrears.stream()
         .filter(m -> m.monthsInArrears <= 1)
         .mapToInt(m -> m.outstandingBalance)
         .sum();
