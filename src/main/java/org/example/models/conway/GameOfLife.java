@@ -23,8 +23,8 @@ public class GameOfLife extends AgentBasedModel<GameOfLife.Globals> {
   }
 
   {
-    registerAgentType(Cell.class);
-    registerMessageTypes(Messages.Start.class, Messages.Alive.class);
+    registerAgentTypes(Cell.class);
+    registerLinkTypes(Links.Neighbour.class);
 
     createLongAccumulator("born");
     createLongAccumulator("died");

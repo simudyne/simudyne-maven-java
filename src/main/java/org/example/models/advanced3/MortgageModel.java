@@ -63,6 +63,11 @@ public class MortgageModel extends AgentBasedModel<MortgageModel.Globals> {
   @Input(name = "Number of Households")
   public long nbHouseholds = 100;
 
+  {
+    registerAgentTypes(Bank.class, Household.class);
+    registerLinkTypes(Links.BankLink.class);
+  }
+
   @Override
   public void setup() {
     Group<Household> householdGroup =

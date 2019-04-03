@@ -29,6 +29,8 @@ public class TradingModel extends AgentBasedModel<TradingModel.Globals> {
   }
 
   {
+    registerAgentTypes(Market.class, Trader.class);
+    registerLinkTypes(Links.TradeLink.class);
     createLongAccumulator("buys", "Number of buy orders");
     createLongAccumulator("sells", "Number of sell orders");
     createDoubleAccumulator("price", "Price");
