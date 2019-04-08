@@ -21,6 +21,7 @@ public class TraderTest {
   @Before
   public void init() {
     testKit = TestKit.create(TradingModel.Globals.class);
+    testKit.registerLinkTypes(Links.TradeLink.class);
     trader = testKit.addAgent(Trader.class);
     trader.addLink(TARGET_LINK_ID, Links.TradeLink.class);
 

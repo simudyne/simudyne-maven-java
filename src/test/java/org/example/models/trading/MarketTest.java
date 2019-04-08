@@ -16,6 +16,7 @@ public class MarketTest {
   @Before
   public void init() {
     testKit = TestKit.create(TradingModel.Globals.class);
+    testKit.registerLinkTypes(Links.TradeLink.class);
     market = testKit.addAgent(Market.class);
 
     testKit.createDoubleAccumulator("price");
