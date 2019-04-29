@@ -7,8 +7,6 @@ import simudyne.core.annotations.Constant;
 import simudyne.core.annotations.Input;
 import simudyne.core.annotations.ModelSettings;
 
-import java.util.Random;
-
 @ModelSettings(macroStep = 100)
 public class TradingModel extends AgentBasedModel<TradingModel.Globals> {
 
@@ -37,6 +35,12 @@ public class TradingModel extends AgentBasedModel<TradingModel.Globals> {
   }
 
   @Override
+  public void init() {
+    getGlobals().informationSignal =
+        getContext().getPRNG().generator.nextGaussian() * getGlobals().volatilityInfo;
+  }
+
+  @Override
   public void setup() {
     Group<Trader> traderGroup = generateGroup(Trader.class, getGlobals().nbTraders);
     Group<Market> marketGroup = generateGroup(Market.class, 1);
@@ -51,7 +55,8 @@ public class TradingModel extends AgentBasedModel<TradingModel.Globals> {
   public void step() {
     super.step();
 
-    getGlobals().informationSignal = new Random().nextGaussian() * getGlobals().volatilityInfo;
+    getGlobals().informationSignal =
+        getContext().getPRNG().generator.nextGaussian() * getGlobals().volatilityInfo;
 
     run(Trader.processInformation(), Market.calcPriceImpact(), Trader.updateThreshold());
   }
