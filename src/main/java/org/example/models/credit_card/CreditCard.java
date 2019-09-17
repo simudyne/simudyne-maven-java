@@ -1,13 +1,13 @@
 package org.example.models.credit_card;
 
-import simudyne.core.Model;
+import org.example.models.AbstractModel;
 import simudyne.core.annotations.Constant;
 import simudyne.core.annotations.Input;
 import simudyne.core.annotations.ModelSettings;
 import simudyne.core.annotations.Variable;
 
 @ModelSettings(timeUnit = "MONTHS", macroStep = 100)
-public class CreditCard implements Model {
+public class CreditCard extends AbstractModel {
 
   @Constant public long credit_limit = 0;
 
