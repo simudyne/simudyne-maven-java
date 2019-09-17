@@ -7,7 +7,6 @@ import simudyne.core.abm.GlobalState;
 import simudyne.core.abm.Group;
 import simudyne.core.annotations.Input;
 import simudyne.core.annotations.ModelSettings;
-import simudyne.core.annotations.Variable;
 import simudyne.core.graph.LongAccumulator;
 
 @ModelSettings(macroStep = 120)
@@ -36,12 +35,6 @@ public class MortgageModel extends AgentBasedModel<MortgageModel.Globals> {
 
     @Input(name = "Income Volatility (%)")
     public double incomeVolatility = 2.5;
-
-    @Variable(name = "Stage 1 Provisions")
-    public double stage1Provisions = 0.0;
-
-    @Variable(name = "Stage 2 Provisions")
-    public double stage2Provisions = 0.0;
   }
 
   public LongAccumulator accEquity = createLongAccumulator("equity");
