@@ -10,6 +10,23 @@ pool:
   vmImage: 'ubuntu-latest'
 
 steps:
+
+- task: DownloadSecureFile@1
+  name: license
+  inputs:
+    secureFile: 'azure_pipelines.license'
+
+- task: DownloadSecureFile@1
+  name: maven_settings
+  inputs:
+    secureFile: 'settings.xml'
+
+- script: |
+    mkdir -p ~/.simudyne
+    cp $(license.secureFilePath) /home/vsts/.simudyne/azure.license
+    cp $(maven_settings.secureFilePath) $(System.DefaultWorkingDirectory)/settings.xml
+  displayName: 'Setup Files'
+
 - task: Maven@3
   inputs:
     mavenPomFile: 'pom.xml'
