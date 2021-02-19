@@ -16,6 +16,6 @@ the `settings.xml` file.**
 Included in the pom.xml is configuration for the `exec-maven-plugin`, so you can run the compiled project via
 `mvn -s settings.xml clean compile exec:java`, which will compile the project and then call the Main.main method.
 
-## Distributing the project with Spark
+## Additional Info
 
-You can start your distributed project from the preconfigured project for Maven and Spark : [https://bitbucket.org/simudyne/simudyne-maven-java-spark](https://bitbucket.org/simudyne/simudyne-maven-java-spark)
+For information on distribution, usage, deployment, and more please refer to documentation at our [Portal](https://portal.simudyne.com/)
