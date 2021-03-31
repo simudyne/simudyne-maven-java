@@ -54,12 +54,7 @@ public class SchellingModel extends AgentBasedModel<SchellingModel.Globals> {
             run(SchellingAgent.registerToEnvironment(), Environment.receiveRegistrations());
             run(Environment.initPositions());
         }
-        else {
-            run(SchellingAgent.checkSatisfaction());
-            run(SchellingAgent.sendUnhappyMessage(), Environment.moveAgents());
-        }
-
-        run(Environment.calculateSimilarityMetrics());
-        run(Environment.sendAgentStates(), SchellingAgent.updateState());
+        run(Environment.updateAgentStates(), SchellingAgent.updateState());
+        run(SchellingAgent.step(), Environment.moveAgents());
     }
 }

@@ -14,21 +14,17 @@ public abstract class SchellingAgent extends Agent<SchellingModel.Globals> {
 
     public AgentState state;
 
-    public static Action<SchellingAgent> checkSatisfaction() {
-        return Action.create(SchellingAgent.class, schellingAgent ->
-                schellingAgent.state.changeSatisfaction(schellingAgent.state.similarityMetric < schellingAgent.similarityThreshold
-                ? AgentState.Satisfaction.UNHAPPY : AgentState.Satisfaction.HAPPY));
-    }
-
-    public static Action<SchellingAgent> sendUnhappyMessage() {
+    public static Action<SchellingAgent> step() {
         return Action.create(SchellingAgent.class, schellingAgent -> {
-            if (schellingAgent.state.satisfaction == AgentState.Satisfaction.UNHAPPY){
+            schellingAgent.state.changeSatisfaction(schellingAgent.state.similarityMetric < schellingAgent.similarityThreshold
+                    ? AgentState.Satisfaction.UNHAPPY : AgentState.Satisfaction.HAPPY);
+
+            if (schellingAgent.state.satisfaction == AgentState.Satisfaction.UNHAPPY) {
                 schellingAgent.getLinks(Links.SchellingToEnvironmentLink.class)
                         .send(Messages.UnhappyMessage.class);
             }
         });
     }
-
 
     public static Action<SchellingAgent> registerToEnvironment() {
         return Action.create(SchellingAgent.class, schellingAgent -> {

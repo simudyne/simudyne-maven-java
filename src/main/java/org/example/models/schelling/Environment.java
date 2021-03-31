@@ -72,7 +72,7 @@ public class Environment extends Agent<SchellingModel.Globals> {
     public static Action<Environment> moveAgents() {
         return Action.create(Environment.class, environment -> {
             environment.unhappyAgentCount = 0;
-            environment.getMessagesOfType(Messages.UnhappyMessage.class).forEach(msg -> {
+            environment.getMessagesOfType(Messages.UnhappyMessage.class).stream().unordered().forEach(msg -> {
                         environment.unhappyAgentCount += 1;
                         AgentState.AgentRace race = environment.agentMap.get(msg.getSender()).race;
                         Optional<Cell> optionalCell = environment.grid.cellList.stream().filter(x ->
@@ -95,23 +95,19 @@ public class Environment extends Agent<SchellingModel.Globals> {
     }
 
 
-    public static Action<Environment> calculateSimilarityMetrics() {
+    public static Action<Environment> updateAgentStates() {
         return Action.create(Environment.class, environment -> {
             environment.averageSimilarity = 0;
             environment.agentMap.forEach((agentID, agentState) -> {
                 double similarityMetric = environment.calculateSimilarityMetric(agentState.position.coordinates, agentState.race);
                 agentState.changeSimilarityMetric(similarityMetric);
                 environment.averageSimilarity += similarityMetric;
+
+                environment.getLinksTo(agentID).send(Messages.StateMessage.class, (msg, link) ->
+                        msg.state = agentState);
             });
             environment.averageSimilarity = environment.averageSimilarity / environment.agentMap.size();
         });
-    }
-
-    public static Action<Environment> sendAgentStates() {
-        return Action.create(Environment.class, environment ->
-                environment.agentMap.forEach((agentID, agentState) ->
-                        environment.getLinksTo(agentID).send(Messages.StateMessage.class, (msg, link) ->
-                                msg.state = agentState)));
     }
 
 }
