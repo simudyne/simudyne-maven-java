@@ -25,11 +25,6 @@ public class AgentState {
         this.race = race;
     }
 
-    public AgentState(AgentRace race, Cell position, Satisfaction satisfaction) {
-        this(race);
-        this.position = position;
-        this.satisfaction = satisfaction;
-    }
 
     public void changePosition(Cell position) {
         this.position = position;

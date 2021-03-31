@@ -9,7 +9,7 @@ public class Grid {
 
     public List<Cell> cellList;
 
-    private final int gridSize;
+    public final int gridSize;
 
     public Grid(int gridSize) {
         this.gridSize = gridSize;
@@ -32,4 +32,5 @@ public class Grid {
         for (int i = 0; i < nbBlue + nbRed; ++i)
             cellList.get(i).setState(i < nbBlue ? CellState.BLUE : CellState.RED);
     }
+
 }

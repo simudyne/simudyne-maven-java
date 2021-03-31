@@ -1,30 +1,48 @@
 package org.example.models.schelling;
 
 import simudyne.core.abm.AgentBasedModel;
+import simudyne.core.abm.GlobalState;
 import simudyne.core.abm.Group;
+import simudyne.core.annotations.Input;
 import simudyne.core.annotations.ModelSettings;
 
 @ModelSettings(macroStep = 100)
-public class SchellingModel extends AgentBasedModel<Environment> {
+public class SchellingModel extends AgentBasedModel<SchellingModel.Globals> {
+
+    public static final class Globals extends GlobalState {
+        @Input(name = "Grid Size")
+        public int gridSize = 40;
+
+        @Input(name = "Empty Cells Proportion")
+        public double emptyCellsPcg = 0.01;
+
+        @Input(name = "Similarity Threshold")
+        public double similarityThreshold = 0.4;
+
+        public GridParameters gridParameters;
+    }
 
     {
-        registerAgentTypes(SchellingAgent.class, BlueAgent.class, RedAgent.class);
-        createLongAccumulator("numUnhappy", "Number of unhappy agents");
-        createDoubleAccumulator("avSimilarity", "Average Similarity");
+        registerAgentTypes(Environment.class, SchellingAgent.class, BlueAgent.class, RedAgent.class);
+        registerLinkTypes(Links.SchellingToEnvironmentLink.class, Links.EnvironmentToSchellingLink.class);
+        registerMessageTypes(Messages.StateMessage.class, Messages.UnhappyMessage.class);
     }
 
     @Override
     public void setup() {
-        System.out.println(getGlobals().nbBlue + " " + getGlobals().nbRed + " " + getGlobals().nbEmpty);
+        getGlobals().gridParameters = new GridParameters(getGlobals().gridSize, getGlobals().emptyCellsPcg);
 
-        Group<BlueAgent> blueAgentGroup = generateGroup(BlueAgent.class, getGlobals().nbBlue,
-                blueAgent -> {
-                    blueAgent.similarityThreshold = getGlobals().similarityThreshold;
-                });
-        Group<RedAgent> redAgentGroup = generateGroup(RedAgent.class, getGlobals().nbRed,
-                redAgent -> {
-                    redAgent.similarityThreshold = getGlobals().similarityThreshold;
-                });
+        Group<Environment> environmentGroup = generateGroup(Environment.class, 1, Environment::initEnvironment);
+
+        Group<BlueAgent> blueAgentGroup = generateGroup(BlueAgent.class, getGlobals().gridParameters.nbBlue,
+                blueAgent -> blueAgent.similarityThreshold = getGlobals().similarityThreshold);
+        Group<RedAgent> redAgentGroup = generateGroup(RedAgent.class, getGlobals().gridParameters.nbRed,
+                redAgent -> redAgent.similarityThreshold = getGlobals().similarityThreshold);
+
+        environmentGroup.fullyConnected(blueAgentGroup, Links.EnvironmentToSchellingLink.class);
+        environmentGroup.fullyConnected(redAgentGroup, Links.EnvironmentToSchellingLink.class);
+        blueAgentGroup.fullyConnected(environmentGroup, Links.SchellingToEnvironmentLink.class);
+        redAgentGroup.fullyConnected(environmentGroup, Links.SchellingToEnvironmentLink.class);
 
         super.setup();
     }
@@ -33,16 +51,15 @@ public class SchellingModel extends AgentBasedModel<Environment> {
     public void step() {
 
         if (getContext().getTick() == 0) {
-            run(SchellingAgent.register());
-            getGlobals().initPositions();
+            run(SchellingAgent.registerToEnvironment(), Environment.receiveRegistrations());
+            run(Environment.initPositions());
         }
         else {
             run(SchellingAgent.checkSatisfaction());
-            run(SchellingAgent.move());
+            run(SchellingAgent.sendUnhappyMessage(), Environment.moveAgents());
         }
 
-        getGlobals().calculateSimilarityMetrics();
-        run(SchellingAgent.updateState());
-
+        run(Environment.calculateSimilarityMetrics());
+        run(Environment.sendAgentStates(), SchellingAgent.updateState());
     }
 }

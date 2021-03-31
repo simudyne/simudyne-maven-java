@@ -1,74 +1,48 @@
 package org.example.models.schelling;
 
-import simudyne.core.abm.GlobalState;
-import simudyne.core.annotations.Input;
+import simudyne.core.abm.Action;
+import simudyne.core.abm.Agent;
 import simudyne.core.annotations.Variable;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Optional;
 
-public class Environment extends GlobalState {
-    @Input(name = "Grid Size")
-    public int gridSize = 30;
-
-    @Input(name = "Empty Cells Proportion")
-    public double emptyCellsPcg = 0.1;
-
-    @Input(name = "Similarity Threshold")
-    public double similarityThreshold = 0.33;
-
-    public int nbTotal;
-
-    public int nbOccupied;
-
-    public int nbEmpty;
-
-    public int nbBlue;
-
-    public int nbRed;
-
-    private HashMap<Long, AgentState> agentMap;
+public class Environment extends Agent<SchellingModel.Globals> {
+    public HashMap<Long, AgentState> agentMap;
 
     public Grid grid;
 
-    public Environment() {
-        this.initTotals();
-        grid = new Grid(gridSize);
+    @Variable
+    public double averageSimilarity;
+
+    @Variable
+    public int unhappyAgentCount;
+
+    public void initEnvironment() {
+        grid = new Grid(getGlobals().gridSize);
         agentMap = new HashMap<>();
 
-        grid.init(nbBlue, nbRed);
+        grid.init(getGlobals().gridParameters.nbBlue, getGlobals().gridParameters.nbRed);
     }
 
-    public void initTotals() {
-        nbTotal = (int) Math.pow(gridSize, 2);
-        nbEmpty = (int) Math.ceil(nbTotal * emptyCellsPcg);
-        nbOccupied = nbTotal - nbEmpty;
-
-        if (nbOccupied % 2 != 0) {
-            nbEmpty += 1;
-            nbOccupied -= 1;
-        }
-        nbBlue = nbOccupied / 2;
-        nbRed = nbOccupied - nbBlue;
+    public static Action<Environment> receiveRegistrations() {
+        return Action.create(Environment.class, environment ->
+                environment.getMessagesOfType(Messages.StateMessage.class).forEach(stateMessage ->
+                        environment.agentMap.put(stateMessage.getSender(), stateMessage.state)));
     }
 
-    public void register(long agentID, AgentState agentState) {
-        agentMap.put(agentID, agentState);
-    }
-
-
-    public void initPositions() {
-        agentMap.forEach((agentID, agentState) -> {
-            Optional<Cell> optionalCell = grid.cellList.stream().filter(x -> x.sameAgentState(agentState.race) && !x.occupied).findFirst();
+    public static Action<Environment> initPositions() {
+        return Action.create(Environment.class, environment -> environment.agentMap.forEach((agentID, agentState) -> {
+            Optional<Cell> optionalCell = environment.grid.cellList.stream()
+                    .filter(x -> x.sameAgentState(agentState.race) && !x.occupied).findFirst();
 
             if (!optionalCell.isPresent())
                 throw new IllegalArgumentException("No position found.");
 
             Cell cell = optionalCell.get();
-            cell.occupied = true;
+            cell.switchState(agentState.race);
             agentState.position = cell;
-        });
+        }));
     }
 
     public double calculateSimilarityMetric(Coordinates coordinates, AgentState.AgentRace agentRace) {
@@ -78,8 +52,8 @@ public class Environment extends GlobalState {
         for (int i = -1; i <= 1; ++i) {
             for (int j = -1; j <= 1; ++j) {
                 Coordinates newCoordinates = new Coordinates(coordinates.x + i, coordinates.y + j);
-                if (newCoordinates.x >= 0 && newCoordinates.y < gridSize &&
-                        newCoordinates.y >= 0 && newCoordinates.x < gridSize && !(i == 0 && j == 0)) {
+                if (newCoordinates.x >= 0 && newCoordinates.y < grid.gridSize &&
+                        newCoordinates.y >= 0 && newCoordinates.x < grid.gridSize && !(i == 0 && j == 0)) {
                     if (grid.cells[newCoordinates.x][newCoordinates.y].state != CellState.EMPTY) {
                         neighbours += 1;
                         if (grid.cells[newCoordinates.x][newCoordinates.y].sameAgentState(agentRace)) {
@@ -95,29 +69,49 @@ public class Environment extends GlobalState {
         return similarityMetric;
     }
 
-    public void moveAgent(AgentState agentState) {
-        Optional<Cell> optionalCell = grid.cellList.stream().filter(x ->
-                !x.occupied && calculateSimilarityMetric(x.coordinates, agentState.race) >=
-                        similarityThreshold).findAny();
+    public static Action<Environment> moveAgents() {
+        return Action.create(Environment.class, environment -> {
+            environment.unhappyAgentCount = 0;
+            environment.getMessagesOfType(Messages.UnhappyMessage.class).forEach(msg -> {
+                        environment.unhappyAgentCount += 1;
+                        AgentState.AgentRace race = environment.agentMap.get(msg.getSender()).race;
+                        Optional<Cell> optionalCell = environment.grid.cellList.stream().filter(x ->
+                                !x.occupied && environment.calculateSimilarityMetric(x.coordinates, race) >=
+                                        environment.getGlobals().similarityThreshold).findAny();
 
-        if (!optionalCell.isPresent())
-            return;
+                        if (!optionalCell.isPresent())
+                            return;
 
-        Cell cell = optionalCell.get();
-        cell.occupied = true;
-        cell.switchState(agentState.race);
-        agentState.changePosition(cell);
-    }
+                        Cell oldCell = environment.agentMap.get(msg.getSender()).position;
+                        oldCell.vacate();
 
-    public AgentState getAgentState(long agentID) {
-        return agentMap.get(agentID);
-    }
+                        Cell newCell = optionalCell.get();
+                        newCell.switchState(race);
 
-    public void calculateSimilarityMetrics() {
-        agentMap.forEach((agentID, agentState) -> {
-            double similarityMetric = calculateSimilarityMetric(agentState.position.coordinates, agentState.race);
-            agentState.changeSimilarityMetric(similarityMetric);
+                        environment.agentMap.get(msg.getSender()).changePosition(newCell);
+                    }
+            );
         });
+    }
+
+
+    public static Action<Environment> calculateSimilarityMetrics() {
+        return Action.create(Environment.class, environment -> {
+            environment.averageSimilarity = 0;
+            environment.agentMap.forEach((agentID, agentState) -> {
+                double similarityMetric = environment.calculateSimilarityMetric(agentState.position.coordinates, agentState.race);
+                agentState.changeSimilarityMetric(similarityMetric);
+                environment.averageSimilarity += similarityMetric;
+            });
+            environment.averageSimilarity = environment.averageSimilarity / environment.agentMap.size();
+        });
+    }
+
+    public static Action<Environment> sendAgentStates() {
+        return Action.create(Environment.class, environment ->
+                environment.agentMap.forEach((agentID, agentState) ->
+                        environment.getLinksTo(agentID).send(Messages.StateMessage.class, (msg, link) ->
+                                msg.state = agentState)));
     }
 
 }

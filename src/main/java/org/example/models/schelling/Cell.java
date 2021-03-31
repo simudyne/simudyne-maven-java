@@ -21,17 +21,18 @@ public class Cell {
     }
 
     public void switchState(AgentState.AgentRace race) {
-        if (race == AgentState.AgentRace.BLUE)
-            setState(CellState.BLUE);
-        else
-            setState(CellState.RED);
+        setState(race == AgentState.AgentRace.BLUE ? CellState.BLUE : CellState.RED);
+        occupied = true;
+    }
+
+    public void vacate() {
+        setState(CellState.EMPTY);
+        occupied = false;
     }
 
     public boolean sameAgentState(AgentState.AgentRace race) {
-        if ((state == CellState.BLUE && race == AgentState.AgentRace.BLUE) ||
-                (state == CellState.RED && race == AgentState.AgentRace.RED))
-            return true;
-        return false;
+        return (state == CellState.BLUE && race == AgentState.AgentRace.BLUE) ||
+                (state == CellState.RED && race == AgentState.AgentRace.RED);
     }
 
 }
