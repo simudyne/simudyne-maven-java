@@ -4,11 +4,12 @@ import simudyne.core.abm.Action;
 import simudyne.core.abm.Agent;
 import simudyne.core.annotations.Variable;
 
-import java.util.HashMap;
-import java.util.Optional;
+import java.util.*;
 
 public class Environment extends Agent<SchellingModel.Globals> {
     public HashMap<Long, AgentState> agentMap;
+
+    public Random random;
 
     public Grid grid;
 
@@ -19,7 +20,8 @@ public class Environment extends Agent<SchellingModel.Globals> {
     public int unhappyAgentCount;
 
     public void initEnvironment() {
-        grid = new Grid(getGlobals().gridSize);
+        random = new Random(getPrng().generator.nextInt());
+        grid = new Grid(getGlobals().gridSize, getPrng().generator.nextInt());
         agentMap = new HashMap<>();
 
         grid.init(getGlobals().gridParameters.nbBlue, getGlobals().gridParameters.nbRed);
@@ -71,10 +73,15 @@ public class Environment extends Agent<SchellingModel.Globals> {
 
     public static Action<Environment> moveAgents() {
         return Action.create(Environment.class, environment -> {
-            environment.unhappyAgentCount = 0;
-            environment.getMessagesOfType(Messages.UnhappyMessage.class).stream().unordered().forEach(msg -> {
-                        environment.unhappyAgentCount += 1;
-                        AgentState.AgentRace race = environment.agentMap.get(msg.getSender()).race;
+
+            ArrayList<Long> unhappyAgents = new ArrayList<>();
+            environment.getMessagesOfType(Messages.UnhappyMessage.class).forEach(msg -> unhappyAgents.add(msg.getSender()));
+            Collections.sort(unhappyAgents);
+            Collections.shuffle(unhappyAgents, environment.random);
+            environment.unhappyAgentCount = unhappyAgents.size();
+
+            unhappyAgents.forEach(agentID -> {
+                        AgentState.AgentRace race = environment.agentMap.get(agentID).race;
                         Optional<Cell> optionalCell = environment.grid.cellList.stream().filter(x ->
                                 !x.occupied && environment.calculateSimilarityMetric(x.coordinates, race) >=
                                         environment.getGlobals().similarityThreshold).findAny();
@@ -82,13 +89,13 @@ public class Environment extends Agent<SchellingModel.Globals> {
                         if (!optionalCell.isPresent())
                             return;
 
-                        Cell oldCell = environment.agentMap.get(msg.getSender()).position;
+                        Cell oldCell = environment.agentMap.get(agentID).position;
                         oldCell.vacate();
 
                         Cell newCell = optionalCell.get();
                         newCell.switchState(race);
 
-                        environment.agentMap.get(msg.getSender()).changePosition(newCell);
+                        environment.agentMap.get(agentID).changePosition(newCell);
                     }
             );
         });

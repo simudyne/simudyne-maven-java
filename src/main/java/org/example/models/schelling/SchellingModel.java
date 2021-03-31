@@ -6,6 +6,8 @@ import simudyne.core.abm.Group;
 import simudyne.core.annotations.Input;
 import simudyne.core.annotations.ModelSettings;
 
+import java.util.Random;
+
 @ModelSettings(macroStep = 100)
 public class SchellingModel extends AgentBasedModel<SchellingModel.Globals> {
 

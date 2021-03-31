@@ -3,16 +3,21 @@ package org.example.models.schelling;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Random;
 
 public class Grid {
     public Cell[][] cells;
 
     public List<Cell> cellList;
 
+    public Random random;
+
     public final int gridSize;
 
-    public Grid(int gridSize) {
+    public Grid(int gridSize, int seed) {
         this.gridSize = gridSize;
+
+        random = new Random(seed);
 
         cells = new Cell[gridSize][gridSize];
 
@@ -27,8 +32,7 @@ public class Grid {
     }
 
     public void init(int nbBlue, int nbRed) {
-        // todo: make this deterministic
-        Collections.shuffle(cellList);
+        Collections.shuffle(cellList, random);
         for (int i = 0; i < nbBlue + nbRed; ++i)
             cellList.get(i).setState(i < nbBlue ? CellState.BLUE : CellState.RED);
     }
