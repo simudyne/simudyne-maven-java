@@ -6,9 +6,7 @@ import simudyne.core.abm.Group;
 import simudyne.core.annotations.Input;
 import simudyne.core.annotations.ModelSettings;
 
-import java.util.Random;
-
-@ModelSettings(macroStep = 100)
+@ModelSettings(macroStep = 50)
 public class SchellingModel extends AgentBasedModel<SchellingModel.Globals> {
 
     public static final class Globals extends GlobalState {
@@ -21,10 +19,14 @@ public class SchellingModel extends AgentBasedModel<SchellingModel.Globals> {
         @Input(name = "Similarity Threshold")
         public double similarityThreshold = 0.4;
 
+        @Input(name = "Data Export Tick")
+        public int dataExportTick = 49;
+
         public GridParameters gridParameters;
     }
 
-    {
+    @Override
+    public void init() {
         registerAgentTypes(Environment.class, SchellingAgent.class, BlueAgent.class, RedAgent.class);
         registerLinkTypes(Links.SchellingToEnvironmentLink.class, Links.EnvironmentToSchellingLink.class);
         registerMessageTypes(Messages.StateMessage.class, Messages.UnhappyMessage.class);
@@ -58,5 +60,9 @@ public class SchellingModel extends AgentBasedModel<SchellingModel.Globals> {
         }
         run(Environment.updateAgentStates(), SchellingAgent.updateState());
         run(SchellingAgent.step(), Environment.moveAgents());
+        run(Environment.writeData());
+        if (getContext().getTick() == getGlobals().dataExportTick) {
+            run(Environment.exportJSONOutput());
+        }
     }
 }

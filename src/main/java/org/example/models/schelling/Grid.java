@@ -1,11 +1,14 @@
 package org.example.models.schelling;
 
+import simudyne.core.annotations.Variable;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
 public class Grid {
+
     public Cell[][] cells;
 
     public List<Cell> cellList;

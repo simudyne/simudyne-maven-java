@@ -1,10 +1,15 @@
 package org.example.models.schelling;
 
+import org.codehaus.jettison.json.JSONArray;
 import simudyne.core.abm.Action;
 import simudyne.core.abm.Agent;
 import simudyne.core.annotations.Variable;
+import simudyne.core.values.ValueArray;
+import simudyne.core.values.ValueRecord;
 
+import java.io.FileNotFoundException;
 import java.util.*;
+import java.io.PrintWriter;
 
 public class Environment extends Agent<SchellingModel.Globals> {
     public HashMap<Long, AgentState> agentMap;
@@ -12,6 +17,8 @@ public class Environment extends Agent<SchellingModel.Globals> {
     public Random random;
 
     public Grid grid;
+
+    public DataOutput dataOutput;
 
     @Variable
     public double averageSimilarity;
@@ -25,7 +32,10 @@ public class Environment extends Agent<SchellingModel.Globals> {
         agentMap = new HashMap<>();
 
         grid.init(getGlobals().gridParameters.nbBlue, getGlobals().gridParameters.nbRed);
+
+        dataOutput = new DataOutput();
     }
+
 
     public static Action<Environment> receiveRegistrations() {
         return Action.create(Environment.class, environment ->
@@ -71,6 +81,7 @@ public class Environment extends Agent<SchellingModel.Globals> {
         return similarityMetric;
     }
 
+
     public static Action<Environment> moveAgents() {
         return Action.create(Environment.class, environment -> {
 
@@ -114,6 +125,27 @@ public class Environment extends Agent<SchellingModel.Globals> {
                         msg.state = agentState);
             });
             environment.averageSimilarity = environment.averageSimilarity / environment.agentMap.size();
+        });
+    }
+
+    public static Action<Environment> writeData() {
+        return Action.create(Environment.class, environment -> {
+            environment.dataOutput.addDataValue(environment.getContext().getTick(), new DataValue(environment.grid.cells));
+        });
+    }
+
+    public static Action<Environment> exportJSONOutput() {
+        return Action.create(Environment.class, environment -> {
+            try {
+                PrintWriter pw = new PrintWriter("Grid_History.json");
+                pw.write(environment.dataOutput.gridHistory.toString());
+
+                pw.flush();
+                pw.close();
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
+
         });
     }
 
