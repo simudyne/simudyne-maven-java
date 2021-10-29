@@ -6,53 +6,69 @@ import simudyne.core.abm.Group;
 import simudyne.core.annotations.Constant;
 import simudyne.core.annotations.Input;
 import simudyne.core.annotations.ModelSettings;
+import simudyne.core.annotations.Variable;
+import simudyne.core.graph.DoubleAccumulator;
+import simudyne.core.graph.LongAccumulator;
+import simudyne.core.rng.SeededRandom;
 
-import java.util.Random;
 
-@ModelSettings(macroStep = 100)
+@ModelSettings(macroStep = 60)
 public class TradingModel extends AgentBasedModel<TradingModel.Globals> {
 
-  public static final class Globals extends GlobalState {
-    @Input(name = "Update Frequency")
-    public double updateFrequency = 0.01;
+    public SeededRandom rng = SeededRandom.create(42);
 
-    @Constant(name = "Number of Traders")
-    public long nbTraders = 1000;
+    public static final class Globals extends GlobalState {
+        @Input(name = "Update Frequency")
+        public double updateFrequency = 0.01;
 
-    @Input(name = "Lambda")
-    public double lambda = 10;
+        //@Constant(name = "Number of Traders")
+        public long nbTraders = 200;
 
-    @Input(name = "Volatility of Information Signal")
-    public double volatilityInfo = 0.001;
+        @Input(name = "Lambda")
+        public double lambda = 10;
 
-    public double informationSignal = new Random().nextGaussian() * volatilityInfo;
-  }
+        @Input(name = "Volatility of Information Signal")
+        public double volatilityInfo = 0.001;
 
-  {
-    registerAgentTypes(Market.class, Trader.class);
-    registerLinkTypes(Links.TradeLink.class);
-    createLongAccumulator("buys", "Number of buy orders");
-    createLongAccumulator("sells", "Number of sell orders");
-    createDoubleAccumulator("price", "Price");
-  }
+        public double informationSignal;
+    }
 
-  @Override
-  public void setup() {
-    Group<Trader> traderGroup = generateGroup(Trader.class, getGlobals().nbTraders);
-    Group<Market> marketGroup = generateGroup(Market.class, 1);
+    {
+        createLongAccumulator("buys", "Number of buy orders");
+        createLongAccumulator("sells", "Number of sell orders");
+        createDoubleAccumulator("price", "Price");
 
-    traderGroup.fullyConnected(marketGroup, Links.TradeLink.class);
-    marketGroup.fullyConnected(traderGroup, Links.TradeLink.class);
+        registerAgentTypes(Market.class, Trader.class);
+        registerLinkTypes(Links.MktTraderLink.class, Links.TraderMktLink.class);
+    }
 
-    super.setup();
-  }
+    @Override
+    public void setup() {
+        getGlobals().informationSignal = rng.gaussian(0.0, getGlobals().volatilityInfo).sample();
 
-  @Override
-  public void step() {
-    super.step();
+        Group<Trader> traderGroup =
+                generateGroup(Trader.class, getGlobals().nbTraders);
+        Group<Market> marketGroup =
+                generateGroup(Market.class, 1, market -> {
+                    market.price = 4.0;
+                });
 
-    getGlobals().informationSignal = new Random().nextGaussian() * getGlobals().volatilityInfo;
+        traderGroup.fullyConnected(marketGroup, Links.TraderMktLink.class);
+        marketGroup.fullyConnected(traderGroup, Links.MktTraderLink.class);
 
-    run(Trader.processInformation(), Market.calcPriceImpact(), Trader.updateThreshold());
-  }
+        super.setup();
+    }
+
+    @Override
+    public void step() {
+        super.step();
+
+        getGlobals().informationSignal = rng.gaussian(0.0, getGlobals().volatilityInfo).sample();
+
+        run(
+                Trader.processInformation(),
+                Market.calcPriceImpact(),
+                Trader.updateThreshold()
+        );
+    }
 }

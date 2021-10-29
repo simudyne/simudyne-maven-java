@@ -2,37 +2,31 @@ package org.example.models.trading;
 
 import simudyne.core.abm.Action;
 import simudyne.core.abm.Agent;
-import simudyne.core.functions.SerializableConsumer;
+import simudyne.core.annotations.Variable;
 
 public class Market extends Agent<TradingModel.Globals> {
 
-  double price = 4.0;
+    @Variable
+    public double price;
 
-  private static Action<Market> action(SerializableConsumer<Market> consumer) {
-    return Action.create(Market.class, consumer);
-  }
+    public static Action<Market> calcPriceImpact() {
+        return Action.create(Market.class, market -> {
 
-  public static Action<Market> calcPriceImpact() {
-    return action(
-        market -> {
-          int buys = market.getMessagesOfType(Messages.BuyOrderPlaced.class).size();
-          int sells = market.getMessagesOfType(Messages.SellOrderPlaced.class).size();
+            int buys = market.getMessagesOfType(Messages.BuyOrderPlaced.class).size();
+            int sells = market.getMessagesOfType(Messages.SellOrderPlaced.class).size();
 
-          int netDemand = buys - sells;
+            int netDemand = buys - sells;
 
-          if (netDemand == 0) {
-            market.getLinks(Links.TradeLink.class).send(Messages.MarketPriceChange.class, 0);
-          } else {
-            long nbTraders = market.getGlobals().nbTraders;
-            double lambda = market.getGlobals().lambda;
-            double priceChange = (netDemand / (double) nbTraders) / lambda;
-            market.price += priceChange;
-
-            market.getDoubleAccumulator("price").add(market.price);
-            market
-                .getLinks(Links.TradeLink.class)
-                .send(Messages.MarketPriceChange.class, priceChange);
-          }
+            if (netDemand == 0) {
+                market.getLinks(Links.MktTraderLink.class).send(Messages.PriceChange.class, 0.0);
+            } else {
+                long nbTraders = market.getGlobals().nbTraders;
+                double lambda = market.getGlobals().lambda;
+                double priceChange = (netDemand / (double) nbTraders) / lambda;
+                market.price += priceChange;
+                market.getDoubleAccumulator("price").add(market.price);
+                market.getLinks(Links.MktTraderLink.class).send(Messages.PriceChange.class, priceChange);
+            }
         });
-  }
+    }
 }
